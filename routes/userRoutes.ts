@@ -6,4 +6,7 @@ const userRoutes = new Router();
 // Status Route
 userRoutes.get("/user/:id", userController.getUser);
 
+// Create User Route
+userRoutes.post("/user", userController.createUser);
+
 export { userRoutes };

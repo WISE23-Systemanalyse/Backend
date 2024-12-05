@@ -25,3 +25,11 @@ export async function findUserById(userId: string) {
     eq(userSchema.id, userId),
   );
 }
+
+export async function createUser(userId: string, name: string, email: string) {
+  return await db.insert(userSchema).values({
+    id: userId,
+    name: name,
+    email: email,
+  })
+}

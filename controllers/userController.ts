@@ -19,6 +19,41 @@ const userController = {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid user ID" };
     }
+  },
+  createUser: async (ctx: Context, ) => {
+    try {
+      // Retrieve and parse the request body
+      const body = await ctx.request.body;
+    
+      
+      // Ensure the request body is JSON
+      if (body.type() !== "json") {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Invalid content type" };
+        return;
+      }
+  
+      const value = await body.text(); // Parse the JSON body
+      const { id, name, email } = JSON.parse(value);
+      
+      // Validate the extracted data
+      if (!id || !name || !email) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Invalid user data" };
+        return;
+      }
+  
+      // Call the user service to create the user
+      await userService.createUser(id, name, email);
+  
+      // Respond with success
+      ctx.response.status = 201;
+      ctx.response.body = { message: "User created successfully" };
+    } catch (error) {
+      console.error("Error creating user:", error);
+      ctx.response.status = 500;
+      ctx.response.body = { message: "Internal Server Error" };
+    }
   }
 };
 

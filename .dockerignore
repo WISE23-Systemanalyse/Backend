@@ -1,0 +1,20 @@
+# Ignore node_modules folder
+node_modules/
+
+# Ignore logs
+*.log
+logs/
+!important.log # Exception: include this file
+
+
+# Ignore build artifacts
+dist/
+build/
+
+# Ignore Dockerfile and docker-compose if not needed
+Dockerfile
+docker-compose.yml
+
+# Ignore specific patterns
+*.tmp
+*.swp
