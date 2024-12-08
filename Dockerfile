@@ -8,4 +8,4 @@ ADD . /app
 
 RUN deno install --entrypoint main.ts
 
-CMD ["run", "dev"]
+CMD ["run", "start"]
