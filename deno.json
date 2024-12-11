@@ -4,7 +4,7 @@
     "pull:db": "deno --env -A --node-modules-dir npm:drizzle-kit pull",
     "push:db": "deno --env -A --node-modules-dir npm:drizzle-kit push",
     "migrate:db": "deno --env -A --node-modules-dir npm:drizzle-kit migrate",
-    "start": "deno run migrate:db && deno run --watch -A --env main.ts"
+    "start": "deno run push:db && deno run --watch -A --env main.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
