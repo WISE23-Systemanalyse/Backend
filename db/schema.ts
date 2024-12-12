@@ -10,7 +10,7 @@ export const movie = pgTable("movie", {
 });
 
 export const user = pgTable("users", {
-  id: varchar("clerk_id").notNull().unique().primaryKey(),
+  id: varchar("id").notNull().unique().primaryKey(),
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
