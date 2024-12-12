@@ -1,12 +1,8 @@
-import { Router } from "https://deno.land/x/oak/mod.ts";
-import { userController } from "../controllers/userController.ts";
+import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+import { getProfile, loginUser } from "../controllers/userController.ts";
 
-const userRoutes = new Router();
+const router = new Router();
+router.get("/profile", getProfile); // Profil ansehen
+router.post("/login", loginUser);   // Benutzer einloggen
 
-// Status Route
-userRoutes.get("/user/:id", userController.getUser);
-
-// Create User Route
-userRoutes.post("/user", userController.createUser);
-
-export { userRoutes };
+export { router as userRoutes };

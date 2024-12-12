@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { movie as movieSchema, user as userSchema } from "./schema.ts";
+import { movie as movieSchema, users as userSchema } from "./schema.ts";
 import pg from "pg";
 import { integer } from "drizzle-orm/sqlite-core";
 import { eq } from "drizzle-orm/expressions";

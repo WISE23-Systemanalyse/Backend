@@ -1,4 +1,4 @@
-import { pgTable, text, integer, varchar, timestamp, uniqueIndex } from "drizzle-orm/pg-core"
+import { pgTable, text, integer, varchar, timestamp, uniqueIndex, serial } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -9,12 +9,8 @@ export const movie = pgTable("movie", {
 	year: integer().notNull(),
 });
 
-export const user = pgTable("User", {
-	id: text().primaryKey().notNull(),
-	email: text().notNull(),
-	name: text(),
-}, (table) => {
-	return {
-		emailKey: uniqueIndex("User_email_key").using("btree", table.email.asc().nullsLast().op("text_ops")),
-	}
+export const users = pgTable("user", {
+	id: serial("id").primaryKey(),
+	name: text("name"),
+	email: text("email"),
 });

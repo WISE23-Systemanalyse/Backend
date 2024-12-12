@@ -1,16 +1,18 @@
-// FILE: services/userService.ts
-import {findUserById, createUser} from "../db/db.ts";
-import "https://deno.land/x/dotenv/load.ts";
+import { db } from "../db/db.ts"; // Verbindung zur Datenbank
+import { users } from "../db/schema.ts"; // Datenbankschema
+import { eq } from "drizzle-orm";
+import { hashPassword, verifyPassword } from "../utils/hashUtils.ts";
+import { createJwt } from "../utils/jwtUtils.ts";
 
-
-const userService = {
-  getUserById: async (id: number) => {
-    return (await findUserById(String(id)))[0];
-  },
-
-  createUser: async (id: number, name: string, email: string) => {
-    return await createUser(String(id), name, email);
+export async function login(email: string, password: string) {
+  const user = await db.select().from(users).where(eq(users.email, email)).execute();
+  if (user && await verifyPassword(password, user.passwordHash)) {
+    return await createJwt(user.id);
   }
-};
+  return null;
+}
 
-export { userService };
+export async function getUserById(userId: number) {
+  const user = await db.select().from(users).where(eq(users.id, userId)).execute();
+  return user || null;
+}
