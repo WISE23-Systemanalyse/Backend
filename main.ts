@@ -22,8 +22,4 @@ app.use(movieRoutes.allowedMethods());
 
 // Start the server
 console.log("Server läuft auf http://localhost:8000");
-const env = config();
-const databaseUrl = env.DATABASE_URL || Deno.env.get("DATABASE_URL");
-
-console.log("Database URL:", databaseUrl);
 await app.listen({ port: 8000 });
