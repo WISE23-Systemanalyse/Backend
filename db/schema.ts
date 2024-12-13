@@ -19,3 +19,5 @@ export const user = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const User = user.$inferInsert
