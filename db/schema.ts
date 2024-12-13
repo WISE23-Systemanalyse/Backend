@@ -1,23 +1,7 @@
-import { pgTable, text, integer, varchar, timestamp, uniqueIndex } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
+import * as usersSchema from "./models/users.ts";
+import * as moviesSchema from "./models/movies.ts";
 
-
-
-export const movie = pgTable("movie", {
-	id: integer().primaryKey().notNull(),
-	title: text().notNull(),
-	year: integer().notNull(),
-});
-
-export const user = pgTable("users", {
-  id: varchar("id").notNull().unique().primaryKey(),
-  email: varchar("email").notNull().unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  userName: varchar("user_name"),
-  imageUrl: varchar("image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const User = user.$inferInsert
+export const schema = {
+  ...usersSchema,
+  ...moviesSchema,
+};
