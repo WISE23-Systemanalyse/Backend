@@ -2,7 +2,7 @@ import { Router } from "https://deno.land/x/oak/mod.ts";
 import { Webhook } from "https://esm.sh/svix@0.73.0";
 import { WebhookEvent } from "https://esm.sh/@clerk/backend";
 import { db } from "../db/db.ts";
-import { user } from "../db/schema.ts";
+import { users } from "../db/models/users.ts";
 import { eq } from "drizzle-orm/expressions";
 
 const WebhookRouter = new Router();
@@ -57,13 +57,13 @@ WebhookRouter.post("/clerk-webhooks", async (ctx) => {
       return;
     }
 
-    await db.insert(user).values({
+    await db.insert(users).values({
       id: id,
       email: primaryEmail,
       firstName: first_name || null,
       lastName: last_name || null,
     }).onConflictDoUpdate({
-      target: user.id,
+      target: users.id,
       set: {
         email: primaryEmail,
         firstName: first_name || null,
@@ -71,7 +71,7 @@ WebhookRouter.post("/clerk-webhooks", async (ctx) => {
       },
     });
   } else if (eventType === "user.deleted") {
-    await db.delete(user).where(eq(user.id, evt.data.id));
+    await db.delete(users).where(eq(users.id, evt.data.id));
   }
 
   ctx.response.body = { message: "Webhook received" };
