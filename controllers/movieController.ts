@@ -1,25 +1,94 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
-import { movieService } from "../services/movieService.ts";
+import { Controller } from "../interfaces/controller.ts";
+import { movieRepository } from "../db/repositories/movies.ts";
+import { Movie } from "../db/models/movies.ts";
 
-const movieController = {
-  // Status Route: Gibt den Status der App zurück
-  getMovie: async (ctx: Context) => {
-    const { id }= ctx.params;
-    if (id && !isNaN(Number(id)) ) {
-      const parsedId = parseInt(id, 10);
-      const moivie = await movieService.getMovie(parsedId);
-      if (moivie) {
-        ctx.response.status = 200;
-        ctx.response.body = moivie;
-      } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "Moivie not found" };
-      }
-    } else {
+export class MovieController implements Controller<Movie> {
+  async getAll(ctx: Context): Promise<void> {
+    const movies = await movieRepository.findAll();
+    ctx.response.body = movies;
+  }
+
+  async getOne(ctx: Context): Promise<void> {
+    const id = ctx.request.url.searchParams.get("id");
+    if (!id) {
       ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid moivie ID" };
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+    const movie = await movieRepository.find(id);
+    if (movie) {
+      ctx.response.body = movie;
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Movie not found" };
     }
   }
-};
 
-export { movieController };
+  async create(ctx: Context): Promise<void> {
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+    const contextMovie:Movie = await value.json();
+    try {
+      const { title, id } = contextMovie;
+      if (!title || !id) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Title and id are required" };
+        return;
+      }
+    } catch (e) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid JSON" };
+      return;
+    }
+    const movie = await movieRepository.create( contextMovie );
+    ctx.response.status = 201;
+    ctx.response.body = movie;
+  }
+
+  async update(ctx: Context): Promise<void> {
+    const id = ctx.request.url.searchParams.get("id");
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+    const contextMovie:Movie = await value.json();
+    try {
+      const { title, id } = contextMovie;
+      if (!title || !id) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Title and id are required" };
+        return;
+      }
+    } catch (e) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid JSON" };
+      return;
+    }
+    const movie = await movieRepository.update(id, contextMovie);
+    ctx.response.body = movie;
+  }
+  async delete(ctx: Context): Promise<void> {
+    const id = ctx.request.url.searchParams.get("id");
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+    await movieRepository.delete(id);
+    ctx.response.status = 204;
+  }
+}
+
+export const movieController = new MovieController();

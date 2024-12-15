@@ -4,9 +4,11 @@ import { userController } from "../controllers/userController.ts";
 const userRoutes = new Router();
 
 // Status Route
-userRoutes.get("/user/:id", userController.getUser);
-
-// Create User Route
-userRoutes.post("/user", userController.createUser);
+userRoutes
+    .get("/users/:id", userController.getOne)
+    .get("/users", userController.getAll)
+    .post("/users", userController.create)
+    .put("/users/:id", userController.update)
+    .delete("/users/:id", userController.delete);
 
 export { userRoutes };

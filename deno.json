@@ -4,13 +4,14 @@
     "pull:db": "deno --env -A --node-modules-dir npm:drizzle-kit pull",
     "push:db": "deno --env -A --node-modules-dir npm:drizzle-kit push",
     "migrate:db": "deno --env -A --node-modules-dir npm:drizzle-kit migrate",
-    "start": "deno run migrate:db && deno run --watch -A --env main.ts"
+    "start": "deno run push:db && deno run --watch -A --env main.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@types/pg": "npm:@types/pg@^8.11.10",
     "drizzle-kit": "npm:drizzle-kit@^0.28.1",
     "drizzle-orm": "npm:drizzle-orm@^0.36.4",
-    "pg": "npm:pg@^8.13.1"
+    "pg": "npm:pg@^8.13.1",
+    "postgres": "npm:postgres@^3.4.4"
   }
 }
