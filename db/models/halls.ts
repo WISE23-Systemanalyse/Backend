@@ -1,5 +1,4 @@
-import { pgTable, varchar, timestamp, serial, integer } from "drizzle-orm/pg-core";
-import { int } from "drizzle-orm/singlestore-core";
+import { pgTable, varchar, serial, integer } from "drizzle-orm/pg-core";
 // import { relations } from "drizzle-orm/relations";
 
 export const halls = pgTable("hall", {

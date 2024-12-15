@@ -1,7 +1,16 @@
 import * as usersSchema from "./models/users.ts";
 import * as moviesSchema from "./models/movies.ts";
+import * as hallsSchema from "./models/halls.ts";
+import * as seatsSchema from "./models/seats.ts";
+import * as showsSchema from "./models/shows.ts";
+import * as bookingsSchema from "./models/bookings.ts";
+
 
 export const schema = {
   ...usersSchema,
   ...moviesSchema,
+  ...hallsSchema,
+  ...seatsSchema,
+  ...showsSchema,
+  ...bookingsSchema,
 };

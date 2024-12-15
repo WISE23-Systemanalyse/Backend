@@ -1,7 +1,7 @@
 import { pgTable, serial, numeric, timestamp, integer } from "drizzle-orm/pg-core";
-import { users } from "./users"; 
-import { shows } from "./shows"; 
-import { seats } from "./seats"; 
+import { users } from "./users.ts"; 
+import { shows } from "./shows.ts"; 
+import { seats } from "./seats.ts"; 
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey().unique().notNull(),
