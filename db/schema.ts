@@ -4,6 +4,7 @@ import * as hallsSchema from "./models/halls.ts";
 import * as seatsSchema from "./models/seats.ts";
 import * as showsSchema from "./models/shows.ts";
 import * as bookingsSchema from "./models/bookings.ts";
+import * as paymentsSchema from "./models/payments.ts";
 
 
 export const schema = {
@@ -13,4 +14,5 @@ export const schema = {
   ...seatsSchema,
   ...showsSchema,
   ...bookingsSchema,
+  ...paymentsSchema
 };

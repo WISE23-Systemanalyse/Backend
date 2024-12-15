@@ -1,11 +1,7 @@
 import { relations } from "drizzle-orm/relations";
-import { users, bookings, show, seat, movie, hall } from "./schema";
+import { show, bookings, seat, users, payments, hall, movie } from "./schema";
 
 export const bookingsRelations = relations(bookings, ({one}) => ({
-	user: one(users, {
-		fields: [bookings.userId],
-		references: [users.id]
-	}),
 	show: one(show, {
 		fields: [bookings.showId],
 		references: [show.id]
@@ -14,21 +10,25 @@ export const bookingsRelations = relations(bookings, ({one}) => ({
 		fields: [bookings.seatId],
 		references: [seat.id]
 	}),
-}));
-
-export const usersRelations = relations(users, ({many}) => ({
-	bookings: many(bookings),
+	user: one(users, {
+		fields: [bookings.userId],
+		references: [users.id]
+	}),
+	payment: one(payments, {
+		fields: [bookings.paymentId],
+		references: [payments.id]
+	}),
 }));
 
 export const showRelations = relations(show, ({one, many}) => ({
 	bookings: many(bookings),
-	movie: one(movie, {
-		fields: [show.movieId],
-		references: [movie.id]
-	}),
 	hall: one(hall, {
 		fields: [show.hallId],
 		references: [hall.id]
+	}),
+	movie: one(movie, {
+		fields: [show.movieId],
+		references: [movie.id]
 	}),
 }));
 
@@ -40,11 +40,19 @@ export const seatRelations = relations(seat, ({one, many}) => ({
 	}),
 }));
 
-export const movieRelations = relations(movie, ({many}) => ({
-	shows: many(show),
+export const usersRelations = relations(users, ({many}) => ({
+	bookings: many(bookings),
+}));
+
+export const paymentsRelations = relations(payments, ({many}) => ({
+	bookings: many(bookings),
 }));
 
 export const hallRelations = relations(hall, ({many}) => ({
-	shows: many(show),
 	seats: many(seat),
+	shows: many(show),
+}));
+
+export const movieRelations = relations(movie, ({many}) => ({
+	shows: many(show),
 }));

@@ -9,6 +9,7 @@ showRoutes
   .post("/shows", showController.create) // Create a show
   .put("/shows/:id", showController.update) // Update a show
   .get("/shows/:id/bookings", bookingController.getBookingsByShowId) // Get bookings for a show
-  .delete("/shows:id", showController.delete);
+  .post("/shows/:id/book", bookingController.create) // Create a booking
+  .delete("/shows/:id", showController.delete);
 
 export { showRoutes };

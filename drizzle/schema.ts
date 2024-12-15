@@ -1,49 +1,17 @@
-import { pgTable, unique, numeric, varchar, timestamp, boolean, time, foreignKey, serial, integer } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, serial, varchar, integer, timestamp, unique, boolean, doublePrecision, time } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
 
-export const users = pgTable("users", {
-	id: numeric().primaryKey().notNull(),
-	email: varchar().notNull(),
-	firstName: varchar("first_name"),
-	lastName: varchar("last_name"),
-	userName: varchar("user_name"),
-	imageUrl: varchar("image_url"),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
-	isAdmin: boolean("is_admin"),
-	password: varchar().notNull(),
-}, (table) => {
-	return {
-		usersEmailUnique: unique("users_email_unique").on(table.email),
-	}
-});
-
-export const movie = pgTable("movie", {
-	id: varchar().primaryKey().notNull(),
-	title: varchar().notNull(),
-	year: time().notNull(),
-	imageUrl: varchar("image_url").notNull(),
-}, (table) => {
-	return {
-		movieTitleUnique: unique("movie_title_unique").on(table.title),
-	}
-});
-
 export const bookings = pgTable("bookings", {
 	id: serial().primaryKey().notNull(),
-	userId: numeric("user_id").notNull(),
+	userId: varchar("user_id").notNull(),
 	showId: integer("show_id").notNull(),
 	seatId: integer("seat_id").notNull(),
 	bookingTime: timestamp("booking_time", { mode: 'string' }).defaultNow(),
+	paymentId: integer("payment_id").notNull(),
 }, (table) => {
 	return {
-		bookingsUserIdUsersIdFk: foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "bookings_user_id_users_id_fk"
-		}).onDelete("cascade"),
 		bookingsShowIdShowIdFk: foreignKey({
 			columns: [table.showId],
 			foreignColumns: [show.id],
@@ -54,25 +22,15 @@ export const bookings = pgTable("bookings", {
 			foreignColumns: [seat.id],
 			name: "bookings_seat_id_seat_id_fk"
 		}).onDelete("cascade"),
-	}
-});
-
-export const show = pgTable("show", {
-	id: serial().primaryKey().notNull(),
-	movieId: varchar("movie_id").notNull(),
-	hallId: integer("hall_id").notNull(),
-	startTime: timestamp("start_time", { mode: 'string' }).notNull(),
-}, (table) => {
-	return {
-		showMovieIdMovieIdFk: foreignKey({
-			columns: [table.movieId],
-			foreignColumns: [movie.id],
-			name: "show_movie_id_movie_id_fk"
+		bookingsUserIdUsersIdFk: foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "bookings_user_id_users_id_fk"
 		}).onDelete("cascade"),
-		showHallIdHallIdFk: foreignKey({
-			columns: [table.hallId],
-			foreignColumns: [hall.id],
-			name: "show_hall_id_hall_id_fk"
+		bookingsPaymentIdPaymentsIdFk: foreignKey({
+			columns: [table.paymentId],
+			foreignColumns: [payments.id],
+			name: "bookings_payment_id_payments_id_fk"
 		}).onDelete("cascade"),
 	}
 });
@@ -100,5 +58,60 @@ export const hall = pgTable("hall", {
 }, (table) => {
 	return {
 		hallNameUnique: unique("hall_name_unique").on(table.name),
+	}
+});
+
+export const users = pgTable("users", {
+	id: varchar().primaryKey().notNull(),
+	password: varchar().notNull(),
+	email: varchar().notNull(),
+	firstName: varchar("first_name"),
+	lastName: varchar("last_name"),
+	userName: varchar("user_name"),
+	imageUrl: varchar("image_url"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
+	isAdmin: boolean("is_admin"),
+}, (table) => {
+	return {
+		usersEmailUnique: unique("users_email_unique").on(table.email),
+	}
+});
+
+export const show = pgTable("show", {
+	id: serial().primaryKey().notNull(),
+	movieId: varchar("movie_id").notNull(),
+	hallId: integer("hall_id").notNull(),
+	startTime: timestamp("start_time", { mode: 'string' }).notNull(),
+}, (table) => {
+	return {
+		showHallIdHallIdFk: foreignKey({
+			columns: [table.hallId],
+			foreignColumns: [hall.id],
+			name: "show_hall_id_hall_id_fk"
+		}).onDelete("cascade"),
+		showMovieIdMovieIdFk: foreignKey({
+			columns: [table.movieId],
+			foreignColumns: [movie.id],
+			name: "show_movie_id_movie_id_fk"
+		}).onDelete("cascade"),
+	}
+});
+
+export const payments = pgTable("payments", {
+	id: serial().primaryKey().notNull(),
+	amount: doublePrecision().notNull(),
+	paymentTime: time("payment_time").defaultNow(),
+	tax: doublePrecision().notNull(),
+});
+
+export const movie = pgTable("movie", {
+	id: varchar().primaryKey().notNull(),
+	title: varchar().notNull(),
+	year: integer().notNull(),
+	imageUrl: varchar("image_url").notNull(),
+}, (table) => {
+	return {
+		movieTitleUnique: unique("movie_title_unique").on(table.title),
 	}
 });

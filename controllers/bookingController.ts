@@ -33,12 +33,12 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
+    
     const contextBooking:Booking = await value.json();
     try {
-      const { id, show_id, user_id } = contextBooking;
-      if (!id || !show_id || !user_id) {
+      if(!contextBooking.seat_id || !contextBooking.show_id || !contextBooking.user_id || !contextBooking.payment_id) {
         ctx.response.status = 400;
-        ctx.response.body = { message: "Id, showId and userId are required" };
+        ctx.response.body = { message: "SeatId, ShowId, UserId and PaymentId are required" };
         return;
       }
     } catch (e) {
@@ -46,6 +46,7 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
+  
     const booking = await bookingRepository.create( contextBooking );
     ctx.response.status = 201;
     ctx.response.body = booking;
@@ -117,7 +118,8 @@ export class BookingController implements Controller<Booking> {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        const bookings = await bookingRepository.getBookingsByShowId(id);
+        console.log(id);
+        const bookings = await bookingRepository.getBookingsByUserId(id);
         ctx.response.body = bookings;
     }
 
