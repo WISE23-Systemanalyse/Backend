@@ -1,9 +1,10 @@
-import { pgTable, varchar, timestamp, numeric, boolean} from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, boolean, integer, numeric } from "drizzle-orm/pg-core";
 // import { relations } from "drizzle-orm/relations";
 
 
 export const users = pgTable("users", {
   id: numeric("id").primaryKey().unique().notNull(),
+  password: varchar("password").notNull(),
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),

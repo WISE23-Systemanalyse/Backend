@@ -26,3 +26,5 @@ export class HallRepository implements Repository<Hall> {
         return updatedHall;
     }
 }
+
+export const hallRepository = new HallRepository();

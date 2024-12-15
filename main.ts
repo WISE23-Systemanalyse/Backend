@@ -1,9 +1,14 @@
 import { Application } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
-import { statusRoutes } from "./routes/statusRoutes.ts";
-import { userRoutes } from "./routes/userRoutes.ts";
-import { movieRoutes } from "./routes/movieRoutes.ts";
-import { WebhookRouter } from "./routes/clerk-webhooks.ts";
+import { 
+    statusRoutes,
+    userRoutes,
+    movieRoutes,
+    webhookRouter,
+    showRoutes,
+    bookingRoutes
+}
+from "./routes/index.ts";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 
 const app = new Application();
@@ -21,7 +26,13 @@ app.use(userRoutes.allowedMethods());
 app.use(movieRoutes.routes());
 app.use(movieRoutes.allowedMethods());
 
-app.use(WebhookRouter.routes());
+app.use(showRoutes.routes());
+app.use(showRoutes.allowedMethods());
+
+app.use(bookingRoutes.routes());
+app.use(bookingRoutes.allowedMethods());
+
+app.use(webhookRouter.routes());
 
 // Start the server
 console.log("Server läuft auf http://localhost:8000");

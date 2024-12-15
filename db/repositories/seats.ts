@@ -26,3 +26,5 @@ export class SeatRepository implements Repository<Seat> {
         return updatedSeat;
     }
 }
+
+export const seatRepository = new SeatRepository();

@@ -27,3 +27,5 @@ export class ShowRepository implements Repository<Show> {
         return updatedShow;
     }
 }
+
+export const showRepository = new ShowRepository();

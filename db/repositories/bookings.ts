@@ -1,28 +1,36 @@
 import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
-import { halls, Hall } from "../models/halls.ts";
+import { bookings, Booking } from "../models/bookings.ts";
+import { Show } from "../models/shows.ts";
 import { eq } from "drizzle-orm";
 
-export class HallRepository implements Repository<Hall> {
-    async findAll(): Promise<Hall[]> {
-        const allHalls = await db.select().from(halls);
-        return allHalls;
+
+export class BookingRepository implements Repository<Booking> {
+    async findAll(): Promise<Booking[]> {
+        const allBookings = await db.select().from(bookings);
+        return allBookings;
     }
-    async find(id: Hall['id']): Promise< Hall | null> {
-        const result = await db.query.halls.findFirst({
-            where: eq(halls.id, id),
+    async find(id: Booking['id']): Promise< Booking | null> {
+        const result = await db.query.bookings.findFirst({
+            where: eq(bookings.id, id),
           });
           return result ?? null;
     }
-    async delete(id: Hall['id']): Promise<void> {
-        await db.delete(halls).where(eq(halls.id, id));
+    async delete(id: Booking['id']): Promise<void> {
+        await db.delete(bookings).where(eq(bookings.id, id));
     }
-    async create(value: Create<Hall>): Promise<Hall> {
-      const [hall] = await db.insert(halls).values(value).returning();
-      return hall;
+    async create(value: Create<Booking>): Promise<Booking> {
+      const [booking] = await db.insert(bookings).values(value).returning();
+      return booking;
     }
-    async update(id: Hall['id'], value: Create<Hall>): Promise<Hall> {
-        const [updatedHall] = await db.update(halls).set(value).where(eq(halls.id, id)).returning();
-        return updatedHall;
+    async update(id: Booking['id'], value: Create<Booking>): Promise<Booking> {
+        const [updatedBooking] = await db.update(bookings).set(value).where(eq(bookings.id, id)).returning();
+        return updatedBooking;
+    }
+    async getBookingsByShowId(showId: Show['id']): Promise<Booking[]> {
+            const showBookings = await db.select().from(bookings).where(eq(bookings["show_id"], showId));
+            return showBookings ?? [];
     }
 }
+
+export const bookingRepository = new BookingRepository();

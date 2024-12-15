@@ -5,9 +5,9 @@ import { db } from "../db/db.ts";
 import { users } from "../db/models/users.ts";
 import { eq } from "drizzle-orm/expressions";
 
-const WebhookRouter = new Router();
+const webhookRouter = new Router();
 
-WebhookRouter.post("/clerk-webhooks", async (ctx) => {
+webhookRouter.post("/clerk-webhooks", async (ctx) => {
   const WEBHOOK_SECRET = Deno.env.get("WEBHOOK_SECRET");
 
   if (!WEBHOOK_SECRET) {
@@ -77,4 +77,4 @@ WebhookRouter.post("/clerk-webhooks", async (ctx) => {
   ctx.response.body = { message: "Webhook received" };
 });
 
-export { WebhookRouter };
+export { webhookRouter };
