@@ -34,10 +34,10 @@ export class MovieController implements Controller<Movie> {
     }
     const contextMovie:Movie = await value.json();
     try {
-      const { title, id } = contextMovie;
-      if (!title || !id) {
+      const { title } = contextMovie;
+      if (!title ) {
         ctx.response.status = 400;
-        ctx.response.body = { message: "Title and id are required" };
+        ctx.response.body = { message: "Title is required" };
         return;
       }
     } catch (e) {
