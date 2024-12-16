@@ -5,15 +5,18 @@ import { eq } from "drizzle-orm";
 
 
 export class UserRepository implements Repository<User> {
-    async findAll(): Promise<User[]> {
+    async findAll(): Promise<any[]> {
         const allUsers = await db.select().from(users);
-        return allUsers;
+        const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
+        return usersWithoutPassword;
     }
-    async find(id: User['id']): Promise< User | null> {
+    async find(id: User['id']): Promise< any | null> {
         const result = await db.query.users.findFirst({
             where: eq(users.id, id),
           });
-          return result ?? null;
+        if (!result) return null;
+        const { password: _password, ...user } = result;
+        return user;
     }
     async delete(id: User['id']): Promise<void> {
         await db.delete(users).where(eq(users.id, id));
