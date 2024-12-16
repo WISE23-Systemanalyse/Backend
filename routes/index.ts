@@ -6,5 +6,6 @@ import {webhookRouter } from "./clerk-webhooks.ts";
 import {showRoutes } from "./showRoutes.ts";
 import { hallRoutes } from "./hallRoutes.ts";
 import { paymentRoutes } from "./paymentRoutes.ts";
+import { seatRoutes } from "./seatRoutes.ts";
 
-export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes};
+export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes, seatRoutes};

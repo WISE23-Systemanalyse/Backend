@@ -10,7 +10,7 @@ export class MovieController implements Controller<Movie> {
   }
 
   async getOne(ctx: Context): Promise<void> {
-    const id = ctx.request.url.searchParams.get("id");
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
@@ -51,7 +51,7 @@ export class MovieController implements Controller<Movie> {
   }
 
   async update(ctx: Context): Promise<void> {
-    const id = ctx.request.url.searchParams.get("id");
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
@@ -80,7 +80,7 @@ export class MovieController implements Controller<Movie> {
     ctx.response.body = movie;
   }
   async delete(ctx: Context): Promise<void> {
-    const id = ctx.request.url.searchParams.get("id");
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };

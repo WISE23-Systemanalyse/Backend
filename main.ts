@@ -8,7 +8,8 @@ import {
     showRoutes,
     bookingRoutes,
     hallRoutes,
-    paymentRoutes
+    paymentRoutes,
+    seatRoutes
 }
 from "./routes/index.ts";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
@@ -39,6 +40,9 @@ app.use(hallRoutes.allowedMethods());
 
 app.use(paymentRoutes.routes());
 app.use(paymentRoutes.allowedMethods());
+
+app.use(seatRoutes.allowedMethods());
+app.use(seatRoutes.routes());
 
 app.use(webhookRouter.routes());
 

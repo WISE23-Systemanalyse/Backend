@@ -4,7 +4,7 @@ import { pgTable, varchar, timestamp, boolean, integer, numeric } from "drizzle-
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().unique().notNull(),
-  password: varchar("password").notNull(),
+  password: varchar("password"),
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
