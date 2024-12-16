@@ -6,7 +6,9 @@ import {
     movieRoutes,
     webhookRouter,
     showRoutes,
-    bookingRoutes
+    bookingRoutes,
+    hallRoutes,
+    paymentRoutes
 }
 from "./routes/index.ts";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
@@ -31,6 +33,12 @@ app.use(showRoutes.allowedMethods());
 
 app.use(bookingRoutes.routes());
 app.use(bookingRoutes.allowedMethods());
+
+app.use(hallRoutes.routes());
+app.use(hallRoutes.allowedMethods());
+
+app.use(paymentRoutes.routes());
+app.use(paymentRoutes.allowedMethods());
 
 app.use(webhookRouter.routes());
 

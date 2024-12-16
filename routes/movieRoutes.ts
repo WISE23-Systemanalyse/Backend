@@ -1,5 +1,5 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
-import { movieController } from "../controllers/movieController.ts";
+import { movieController } from "../controllers/index.ts";
 
 const movieRoutes = new Router();
 

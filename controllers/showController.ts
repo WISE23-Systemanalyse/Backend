@@ -28,31 +28,37 @@ export class ShowController implements Controller<Show> {
 
     async create(ctx: Context): Promise<void> {
         const value = await ctx.request.body;
-        if (!value) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Request body is required" };
-            return;
+        const { movie_id, hall_id, start_time }  = await value.json();
+    
+        if (!movie_id || !hall_id || !start_time) {
+          ctx.response.status = 400;
+          ctx.response.body = { message: "Missing required fields" };
+          return;
         }
-
-        const contextShow: Show = await value.json();
+    
+        // Convert start_time to a Date object
+        const startTime = new Date(start_time);
+        if (isNaN(startTime.getTime())) {
+          ctx.response.status = 400;
+          ctx.response.body = { message: "Invalid start_time format" };
+          return;
+        }
+    
+        const newShow: Partial<Show> = {
+          movie_id,
+          hall_id,
+          start_time: startTime,
+        };
+    
         try {
-            const { id, ...requierd_fields } = contextShow;
-            Object.values(requierd_fields).forEach(element => {
-                if (!element) {
-                    ctx.response.status = 400;
-                    ctx.response.body = { message: "Request body is required" };
-                    return;
-                }
-            });
-        } catch (e) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Invalid JSON" };
-            return;
+          const show = await showRepository.create(newShow);
+          ctx.response.status = 201;
+          ctx.response.body = show;
+        } catch (error) {
+          ctx.response.status = 500;
+          ctx.response.body = { message: error.message };
         }
-        const show = await showRepository.create(contextShow);
-        ctx.response.status = 201;
-        ctx.response.body = show;
-    }
+      }
 
     async update(ctx: Context): Promise<void> {
         const { id } = ctx.params;
