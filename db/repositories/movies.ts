@@ -17,7 +17,7 @@ export class MovieRepository implements Repository<Movie> {
     async delete(id: Movie['id']): Promise<void> {
         await db.delete(movies).where(eq(movies.id, id));
     }
-    async create(value: Create<Movie>): Promise<Movie> {
+    async create(value: any): Promise<Movie> {
       const [movie] = await db.insert(movies).values(value).returning();
       return movie;
     }

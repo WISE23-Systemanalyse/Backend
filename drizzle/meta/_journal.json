@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1734286609485,
-      "tag": "0000_fast_maestro",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1734292118528,
-      "tag": "0001_windy_surge",
+      "when": 1734378504974,
+      "tag": "0000_little_shiva",
       "breakpoints": true
     }
   ]
