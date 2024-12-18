@@ -5,7 +5,7 @@ export type Id<TEntity extends Entity> = TEntity extends { id: infer TId } ? TId
 export interface Repository<TEntity extends Entity> {
   findAll(): Promise<TEntity[]>;
   find(id: Id<TEntity>): Promise<TEntity | null>;
-  create(value: Omit<TEntity, 'id'>): Promise<TEntity>;
+  create(value: Create<TEntity>): Promise<TEntity>;
   delete(id: Id<TEntity>): Promise<void>;
   update(id: Id<TEntity>, value: Create<TEntity>): Promise<TEntity>;
 }
