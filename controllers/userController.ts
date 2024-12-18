@@ -1,4 +1,4 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { userRepository } from "../db/repositories/users.ts";
 import { User } from "../db/models/users.ts";
@@ -9,8 +9,8 @@ export class UserController implements Controller<User> {
     ctx.response.body = users;
   }
 
-  async getOne(ctx: Context): Promise<void> {
-    const { id }= ctx.params; 
+  async getOne(ctx: RouterContext<"/users/:id">): Promise<void> {
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
@@ -40,7 +40,7 @@ export class UserController implements Controller<User> {
         ctx.response.body = { message: "Email and id are required" };
         return;
       }
-    } catch (e) {
+    } catch (_e) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
@@ -50,8 +50,8 @@ export class UserController implements Controller<User> {
     ctx.response.body = user;
   }
 
-  async update(ctx: Context): Promise<void> {
-    const id = ctx.request.url.searchParams.get("id");
+  async update(ctx: RouterContext<"/users/:id">): Promise<void> {
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
@@ -75,8 +75,8 @@ export class UserController implements Controller<User> {
     }
   }
 
-  async delete(ctx: Context): Promise<void> {
-    const id = ctx.request.url.searchParams.get("id");
+  async delete(ctx: RouterContext<"/users/:id">): Promise<void> {
+    const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };

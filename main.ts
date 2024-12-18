@@ -1,5 +1,5 @@
-import { Application } from "https://deno.land/x/oak/mod.ts";
-import { oakCors } from "https://deno.land/x/cors/mod.ts";
+import { Application } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import { 
     statusRoutes,
     userRoutes,
@@ -12,7 +12,6 @@ import {
     seatRoutes
 }
 from "./routes/index.ts";
-import { config } from "https://deno.land/x/dotenv/mod.ts";
 
 const app = new Application();
 

@@ -1,7 +1,8 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { movieRepository } from "../db/repositories/movies.ts";
 import { Movie } from "../db/models/movies.ts";
+import { TMDBService } from "../services/tmdbService.ts";
 
 export class MovieController implements Controller<Movie> {
   async getAll(ctx: Context): Promise<void> {
@@ -9,14 +10,14 @@ export class MovieController implements Controller<Movie> {
     ctx.response.body = movies;
   }
 
-  async getOne(ctx: Context): Promise<void> {
+  async getOne(ctx: RouterContext<"/movies/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const movie = await movieRepository.find(id);
+    const movie = await movieRepository.find(Number(id));
     if (movie) {
       ctx.response.body = movie;
     } else {
@@ -40,7 +41,7 @@ export class MovieController implements Controller<Movie> {
         ctx.response.body = { message: "Title is required" };
         return;
       }
-    } catch (e) {
+    } catch (_e) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
@@ -50,7 +51,7 @@ export class MovieController implements Controller<Movie> {
     ctx.response.body = movie;
   }
 
-  async update(ctx: Context): Promise<void> {
+  async update(ctx: RouterContext<"/movies/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -71,23 +72,50 @@ export class MovieController implements Controller<Movie> {
         ctx.response.body = { message: "Title and id are required" };
         return;
       }
-    } catch (e) {
+    } catch (_e) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const movie = await movieRepository.update(id, contextMovie);
+    const movie = await movieRepository.update(Number(id), contextMovie);
     ctx.response.body = movie;
   }
-  async delete(ctx: Context): Promise<void> {
+  async delete(ctx: RouterContext<"/movies/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await movieRepository.delete(id);
+    await movieRepository.delete(Number(id));
     ctx.response.status = 204;
+  }
+
+  async searchTMDB(ctx: Context): Promise<void> {
+    try {
+      const query = ctx.request.url.searchParams.get("query");
+      if (!query) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Query parameter is required" };
+        return;
+      }
+
+      const movies = await TMDBService.searchMovies(query);
+      ctx.response.body = movies;
+    } catch (error: unknown) {
+      ctx.response.status = 500;
+      ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  async getPopularTMDB(ctx: Context): Promise<void> {
+    try {
+      const movies = await TMDBService.getPopularMovies();
+      ctx.response.body = movies;
+    } catch (error: unknown) {
+      ctx.response.status = 500;
+      ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
+    }
   }
 }
 

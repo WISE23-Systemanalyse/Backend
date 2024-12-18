@@ -1,5 +1,5 @@
 export type Entity = Record<string, unknown>;
-export type Create<TEntity extends Entity> = TEntity;
+export type Create<TEntity extends Entity> = Omit<TEntity, 'id'>;
 export type Id<TEntity extends Entity> = TEntity extends { id: infer TId } ? TId : unknown;
 
 export interface Repository<TEntity extends Entity> {

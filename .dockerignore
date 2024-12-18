@@ -18,3 +18,8 @@ docker-compose.yml
 # Ignore specific patterns
 *.tmp
 *.swp
+
+.env
+.env.example
+.env.local
+.dev

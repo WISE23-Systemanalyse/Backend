@@ -4,6 +4,7 @@
     "pull:db": "deno --env -A --node-modules-dir npm:drizzle-kit pull",
     "push:db": "deno --env -A --node-modules-dir npm:drizzle-kit push",
     "migrate:db": "deno --env -A --node-modules-dir npm:drizzle-kit migrate",
+    "generate:db": "deno --env -A --node-modules-dir npm:drizzle-kit generate",
     "start": "deno run migrate:db && deno run --watch -A --env main.ts"
   },
   "imports": {
