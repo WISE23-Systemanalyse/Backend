@@ -92,5 +92,22 @@ export class SeatController implements Controller<Seat> {
         await seatRepository.delete(id);
         ctx.response.status = 204;
     }
+
+  async getByHallId(ctx: Context): Promise<void> {
+    const { hallId } = ctx.params;
+    if (!hallId) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Hall ID parameter is required" };
+      return;
+    }
+
+    try {
+      const seats = await seatRepository.findByHallId(hallId);
+      ctx.response.body = seats;
+    } catch (e) {
+      ctx.response.status = 500;
+      ctx.response.body = { message: "Error fetching seats for hall" };
+    }
+  }
 }
 export const seatController = new SeatController();

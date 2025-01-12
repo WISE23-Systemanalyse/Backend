@@ -9,7 +9,8 @@ seatRoutes
   .get("/seats/:id", seatController.getOne) // Get a seat
   .post("/seats", seatController.create) // Create a seat
   .put("/seats/:id", seatController.update) // Update a seat
-  .delete("/seats/:id", seatController.delete); // Delete a seat
+  .delete("/seats/:id", seatController.delete) // Delete a seat
+  .get("/seats/halls/:hallId", seatController.getByHallId);
 
 
 export { seatRoutes };

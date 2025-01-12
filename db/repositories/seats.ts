@@ -14,6 +14,13 @@ export class SeatRepository implements Repository<Seat> {
           });
           return result ?? null;
     }
+    async findByHallId(hallId: string): Promise<Seat[]> {
+        const result = await db.select()
+            .from(seats)
+            .where(eq(seats.hall_id, Number(hallId)))
+            .orderBy(seats.row_number, seats.seat_number);
+        return result;
+    }
     async delete(id: Seat['id']): Promise<void> {
         await db.delete(seats).where(eq(seats.id, id));
     }
