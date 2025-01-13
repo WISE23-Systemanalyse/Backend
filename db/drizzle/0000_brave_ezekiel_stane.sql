@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS "movie" (
 	"description" varchar NOT NULL,
 	"rating" double precision NOT NULL,
 	"image_url" varchar NOT NULL,
+	"genres" varchar[] NOT NULL,
+	"duration" integer NOT NULL,
 	CONSTRAINT "movie_id_unique" UNIQUE("id"),
 	CONSTRAINT "movie_title_unique" UNIQUE("title")
 );
