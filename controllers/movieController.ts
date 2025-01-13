@@ -3,6 +3,7 @@ import { Controller } from "../interfaces/controller.ts";
 import { movieRepository } from "../db/repositories/movies.ts";
 import { Movie } from "../db/models/movies.ts";
 import { TMDBService } from "../services/tmdbService.ts";
+import { eq } from "drizzle-orm";
 
 export class MovieController implements Controller<Movie> {
   async getAll(ctx: Context): Promise<void> {
@@ -116,6 +117,55 @@ export class MovieController implements Controller<Movie> {
       ctx.response.status = 500;
       ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
     }
+  }
+
+  async getGenres(ctx: RouterContext<"/movies/:id">): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+    const movie = await movieRepository.find(Number(id));
+    if (movie) {
+      ctx.response.body = movie.genres || [];
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Movie not found" };
+    }
+  }
+
+  async updateGenres(ctx: RouterContext<"/movies/:id">): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+
+    const { genres } = await value.json();
+    if (!genres || !Array.isArray(genres)) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Genres must be an array" };
+      return;
+    }
+
+    const movie = await movieRepository.find(Number(id));
+    if (!movie) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Movie not found" };
+      return;
+    }
+
+    const updatedMovie = await movieRepository.update(Number(id), { ...movie, genres });
+    ctx.response.body = updatedMovie;
   }
 }
 
