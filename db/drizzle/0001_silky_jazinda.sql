@@ -1,1 +1,0 @@
-ALTER TABLE "movie" ADD COLUMN "genres" varchar[] NOT NULL;
