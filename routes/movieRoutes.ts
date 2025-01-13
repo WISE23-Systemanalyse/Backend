@@ -11,6 +11,6 @@ movieRoutes
     .put("/movies/:id", movieController.update)
     .delete("/movies/:id", movieController.delete)
     .get("/movies/tmdb/search", movieController.searchTMDB)
-    .get("/movies/tmdb/popular", movieController.getPopularTMDB);
+    .get("/movies/tmdb/popular", movieController.getPopularTMDB)
 
 export { movieRoutes };
