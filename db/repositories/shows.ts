@@ -1,12 +1,37 @@
 import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
-import { Show, shows } from "../models/shows.ts";
+import { Show, shows} from "../models/shows.ts";
+import { movies } from "../models/movies.ts";
+import { halls } from "../models/halls.ts";
 import { eq } from "drizzle-orm";
 
 export class ShowRepository implements Repository<Show> {
   async findAll(): Promise<Show[]> {
+    console.log("Find all shows called1");
     const allShows = await db.select().from(shows);
+    console.log("Find all shows called2");
     return allShows;
+  }
+  async findAllWithDetails(): Promise<{id: number, movie_id: number, hall_id: number, start_time: Date, title: string | null, description: string | null, name: string | null}[]> {
+    try {
+        const allShows = await db
+            .select({
+                id: shows.id,
+                movie_id: shows.movie_id,
+                hall_id: shows.hall_id,
+                start_time: shows.start_time,
+                title: movies.title,
+                description: movies.description,
+                name: halls.name,
+            })
+            .from(shows)
+            .leftJoin(movies, eq(shows.movie_id, movies.id))
+            .leftJoin(halls, eq(shows.hall_id, halls.id));
+        return allShows;
+    } catch (error) {
+        console.error('Error in findAllWithDetails:', error);
+        throw error;
+    }
   }
   async find(id: Show["id"]): Promise<Show | null> {
     const result = await db.query.shows.findFirst({
