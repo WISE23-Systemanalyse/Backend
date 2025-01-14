@@ -6,7 +6,13 @@ import { bookingRepository } from "../db/repositories/bookings.ts";
 
 export class ShowController implements Controller<Show> {
     async getAll(ctx: Context): Promise<void> {
+        console.log("Get all shows called");
         const shows = await showRepository.findAll();
+        ctx.response.body = shows;
+    }
+
+    async getAllWithDetails(ctx: Context): Promise<void> {
+        const shows = await showRepository.findAllWithDetails();
         ctx.response.body = shows;
     }
 

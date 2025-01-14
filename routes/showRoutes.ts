@@ -4,12 +4,13 @@ import { bookingController, showController } from "../controllers/index.ts";
 const showRoutes = new Router();
 
 showRoutes
-  .get("/shows/:id", showController.getOne) // Get one show
-  .get("/shows", showController.getAll) // Get all shows
-  .post("/shows", showController.create) // Create a show
-  .put("/shows/:id", showController.update) // Update a show
-  .get("/shows/:id/bookings", bookingController.getBookingsByShowId) // Get bookings for a show
-  .post("/shows/:id/book", bookingController.create) // Create a booking
+  .get("/shows/details", showController.getAllWithDetails)
+  .get("/shows", showController.getAll)
+  .get("/shows/:id", showController.getOne)
+  .post("/shows", showController.create)
+  .put("/shows/:id", showController.update)
+  .get("/shows/:id/bookings", bookingController.getBookingsByShowId)
+  .post("/shows/:id/book", bookingController.create)
   .delete("/shows/:id", showController.delete);
 
 export { showRoutes };
