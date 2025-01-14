@@ -11,7 +11,6 @@ export const shows = pgTable("show", {
     onDelete: "cascade", // Wenn der Saal gelöscht wird, werden die Shows auch gelöscht
   }),
   start_time: timestamp("start_time").notNull(),
-  
 });
 
 export type Show = typeof shows.$inferSelect;

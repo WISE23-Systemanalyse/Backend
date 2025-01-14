@@ -28,6 +28,12 @@ export class ShowRepository implements Repository<Show> {
     ).returning();
     return updatedShow;
   }
+  async findByMovieId(movieId: Show["movie_id"]): Promise<Show[]> {
+    const result = await db.query.shows.findMany({
+      where: eq(shows.movie_id, movieId),
+    });
+    return result;
+  }
 }
 
 export const showRepository = new ShowRepository();

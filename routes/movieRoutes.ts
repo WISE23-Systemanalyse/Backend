@@ -6,6 +6,7 @@ const movieRoutes = new Router();
 // Status Route
 movieRoutes
     .get("/movies/:id", movieController.getOne)
+    .get("/movies/:id/shows", movieController.getShowsByMovieId)
     .get("/movies", movieController.getAll)
     .post("/movies", movieController.create)
     .put("/movies/:id", movieController.update)
