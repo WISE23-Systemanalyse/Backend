@@ -4,8 +4,8 @@ import { bookingController, showController } from "../controllers/index.ts";
 const showRoutes = new Router();
 
 showRoutes
-  .get("/shows", showController.getAll)
   .get("/shows/details", showController.getAllWithDetails)
+  .get("/shows", showController.getAll)
   .get("/shows/:id", showController.getOne)
   .post("/shows", showController.create)
   .put("/shows/:id", showController.update)
