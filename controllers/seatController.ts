@@ -1,8 +1,7 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { seatRepository } from "../db/repositories/index.ts";
+import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
-
 
 export class SeatController implements Controller<Seat> {
   async getAll(ctx: Context): Promise<void> {
@@ -97,17 +96,131 @@ export class SeatController implements Controller<Seat> {
     const { hallId } = ctx.params;
     if (!hallId) {
       ctx.response.status = 400;
-      ctx.response.body = { message: "Hall ID parameter is required" };
+      ctx.response.body = { message: "HallId parameter is required" };
+      return;
+    }
+    const seats = await seatRepository.findByHallId(hallId);
+    ctx.response.body = seats;
+  }
+
+  async bulkCreate(ctx: Context): Promise<void> {
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+
+    const seats = await value.json();
+    if (!Array.isArray(seats)) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body must be an array of seats" };
       return;
     }
 
     try {
-      const seats = await seatRepository.findByHallId(hallId);
-      ctx.response.body = seats;
-    } catch (e) {
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Error fetching seats for hall" };
+      const createdSeats = await Promise.all(
+        seats.map(seat => seatRepository.create(seat))
+      );
+      ctx.response.status = 201;
+      ctx.response.body = createdSeats;
+    } catch (error) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: error.message };
+    }
+  }
+
+  async bulkUpdate(ctx: Context): Promise<void> {
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+
+    const seats = await value.json();
+    if (!Array.isArray(seats)) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body must be an array of seats" };
+      return;
+    }
+
+    try {
+      const updatedSeats = await Promise.all(
+        seats.map(seat => seatRepository.update(seat.id, seat))
+      );
+      ctx.response.body = updatedSeats;
+    } catch (error) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: error.message };
+    }
+  }
+
+  async bulkDelete(ctx: Context): Promise<void> {
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+
+    const seatIds = await value.json();
+    if (!Array.isArray(seatIds)) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body must be an array of seat IDs" };
+      return;
+    }
+
+    try {
+      await Promise.all(seatIds.map(id => seatRepository.delete(id)));
+      ctx.response.status = 204;
+    } catch (error) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: error.message };
+    }
+  }
+
+  async syncHallSeats(ctx: Context): Promise<void> {
+    const { hallId } = ctx.params;
+    if (!hallId) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "HallId parameter is required" };
+      return;
+    }
+
+    const value = await ctx.request.body;
+    if (!value) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body is required" };
+      return;
+    }
+
+    const newSeats = await value.json();
+    if (!Array.isArray(newSeats)) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Request body must be an array of seats" };
+      return;
+    }
+
+    try {
+      // Lösche alle existierenden Sitze des Saals
+      await seatRepository.deleteByHallId(hallId);
+
+      // Erstelle die neuen Sitze
+      const createdSeats = await Promise.all(
+        newSeats.map(seat => ({
+          ...seat,
+          hall_id: Number(hallId)
+        })).map(seat => seatRepository.create(seat))
+      );
+
+      ctx.response.status = 201;
+      ctx.response.body = createdSeats;
+    } catch (error) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: error.message };
     }
   }
 }
+
 export const seatController = new SeatController();
