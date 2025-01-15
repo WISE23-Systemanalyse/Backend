@@ -2,6 +2,7 @@ import { Context } from "https://deno.land/x/oak/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
+import type { RouterContext } from "https://deno.land/x/oak/mod.ts";
 
 export class SeatController implements Controller<Seat> {
   async getAll(ctx: Context): Promise<void> {
@@ -103,7 +104,7 @@ export class SeatController implements Controller<Seat> {
     ctx.response.body = seats;
   }
 
-  async bulkCreate(ctx: Context): Promise<void> {
+  async bulkCreate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -130,7 +131,7 @@ export class SeatController implements Controller<Seat> {
     }
   }
 
-  async bulkUpdate(ctx: Context): Promise<void> {
+  async bulkUpdate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -156,7 +157,7 @@ export class SeatController implements Controller<Seat> {
     }
   }
 
-  async bulkDelete(ctx: Context): Promise<void> {
+  async bulkDelete(ctx: RouterContext<"/seats/bulk">): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -180,7 +181,7 @@ export class SeatController implements Controller<Seat> {
     }
   }
 
-  async syncHallSeats(ctx: Context): Promise<void> {
+  async syncHallSeats(ctx: RouterContext<"/seats/halls/:hallId/sync">): Promise<void> {
     const { hallId } = ctx.params;
     if (!hallId) {
       ctx.response.status = 400;
