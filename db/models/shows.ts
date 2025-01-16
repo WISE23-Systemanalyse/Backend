@@ -14,3 +14,13 @@ export const shows = pgTable("show", {
 });
 
 export type Show = typeof shows.$inferSelect;
+
+export interface ShowWithDetails extends Show {
+  id: number;
+  movie_id: number;
+  hall_id: number;
+  start_time: Date;
+  title: string | null;
+  description: string | null;
+  name: string | null;
+}

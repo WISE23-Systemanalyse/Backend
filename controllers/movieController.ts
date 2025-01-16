@@ -35,10 +35,15 @@ export class MovieController implements Controller<Movie> {
     }
     const contextMovie:Movie = await value.json();
     try {
-      const { title } = contextMovie;
-      if (!title ) {
+      const { title, duration } = contextMovie;
+      if (!title) {
         ctx.response.status = 400;
         ctx.response.body = { message: "Title is required" };
+        return;
+      }
+      if (!duration || duration <= 0) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Duration must be a positive number" };
         return;
       }
     } catch (_e) {
@@ -46,7 +51,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const movie = await movieRepository.create( contextMovie );
+    const movie = await movieRepository.create(contextMovie);
     ctx.response.status = 201;
     ctx.response.body = movie;
   }
@@ -66,10 +71,15 @@ export class MovieController implements Controller<Movie> {
     }
     const contextMovie:Movie = await value.json();
     try {
-      const { title, id } = contextMovie;
+      const { title, id, duration } = contextMovie;
       if (!title || !id) {
         ctx.response.status = 400;
         ctx.response.body = { message: "Title and id are required" };
+        return;
+      }
+      if (!duration || duration <= 0) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Duration must be a positive number" };
         return;
       }
     } catch (_e) {
