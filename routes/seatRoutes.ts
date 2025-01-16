@@ -9,7 +9,6 @@ seatRoutes
     .post("/seats", seatController.create)
     .put("/seats/:id", seatController.update)
     .delete("/seats/:id", seatController.delete)
-    .get("/seats/halls/:hallId", seatController.getByHallId)
     // Bulk Operations
     .post("/seats/bulk", seatController.bulkCreate)
     .put("/seats/bulk", seatController.bulkUpdate)

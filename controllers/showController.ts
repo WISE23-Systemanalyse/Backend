@@ -32,6 +32,22 @@ export class ShowController implements Controller<Show> {
         }
     }
 
+    async getOneWithDetails(ctx: Context): Promise<void> {
+        const { id } = ctx.params;
+        if (!id) {
+            ctx.response.status = 400;
+            ctx.response.body = { message: "Id parameter is required" };
+            return;
+        }
+        const show = await showRepository.findOneWithDetails(id);
+        if (show) {
+            ctx.response.body = show;
+        } else {
+            ctx.response.status = 404;
+            ctx.response.body = { message: "Show not found" };
+        }
+    }
+
     async create(ctx: Context): Promise<void> {
         const value = await ctx.request.body;
         const { movie_id, hall_id, start_time }  = await value.json();

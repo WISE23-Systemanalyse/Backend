@@ -1,9 +1,9 @@
 import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
-import { Show, shows} from "../models/shows.ts";
+import { Show, shows, ShowWithDetails} from "../models/shows.ts";
 import { movies } from "../models/movies.ts";
 import { halls } from "../models/halls.ts";
-import { eq, gte } from "drizzle-orm";
+import { eq, gte, and } from "drizzle-orm";
 
 export class ShowRepository implements Repository<Show> {
   async findAll(): Promise<Show[]> {
@@ -44,6 +44,7 @@ export class ShowRepository implements Repository<Show> {
         throw error;
     }
   }
+ 
   async find(id: Show["id"]): Promise<Show | null> {
     const result = await db.query.shows.findFirst({
       where: eq(shows.id, id),
@@ -64,10 +65,20 @@ export class ShowRepository implements Repository<Show> {
     ).returning();
     return updatedShow;
   }
-  async findByMovieId(movieId: Show["movie_id"]): Promise<Show[]> {
-    const result = await db.query.shows.findMany({
-      where: eq(shows.movie_id, movieId),
-    });
+  async findByMovieId(movieId: Show["movie_id"]): Promise<{ show_id: number, hall_id: number, hall_name: string, start_time: Date }[]> {
+    const result = await db
+      .select({
+        show_id: shows.id,
+        hall_id: shows.hall_id,
+        hall_name: halls.name,
+        start_time: shows.start_time,
+      })
+      .from(shows)
+      .leftJoin(movies, eq(shows.movie_id, movies.id))
+      .leftJoin(halls, eq(shows.hall_id, halls.id))
+      .where(and(eq(shows.movie_id, movieId), gte(shows.start_time, new Date())))
+      .orderBy(shows.start_time);
+
     return result;
   }
 }

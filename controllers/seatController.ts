@@ -1,4 +1,4 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
@@ -91,18 +91,8 @@ export class SeatController implements Controller<Seat> {
         }
         await seatRepository.delete(id);
         ctx.response.status = 204;
-    }
-
-  async getByHallId(ctx: Context): Promise<void> {
-    const { hallId } = ctx.params;
-    if (!hallId) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "HallId parameter is required" };
-      return;
-    }
-    const seats = await seatRepository.findByHallId(hallId);
-    ctx.response.body = seats;
-  }
+      }
+      
 
   async bulkCreate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
     const value = await ctx.request.body;
