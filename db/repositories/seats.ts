@@ -32,6 +32,9 @@ export class SeatRepository implements Repository<Seat> {
         const [updatedSeat] = await db.update(seats).set(value).where(eq(seats.id, id)).returning();
         return updatedSeat;
     }
+    async deleteByHallId(hallId: string): Promise<void> {
+        await db.delete(seats).where(eq(seats.hall_id, Number(hallId)));
+    }
 }
 
 export const seatRepository = new SeatRepository();
