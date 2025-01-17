@@ -45,12 +45,14 @@ export class ShowRepository implements Repository<Show> {
     }
   }
   async find(id: Show["id"]): Promise<Show | null> {
+    console.log("Repository find called");
     const result = await db.query.shows.findFirst({
       where: eq(shows.id, id),
     });
     return result ?? null;
   }
   async delete(id: Show["id"]): Promise<void> {
+    console.log("Delete called with id:", id);
     await db.delete(shows).where(eq(shows.id, id));
   }
   async create(value: any): Promise<Show> {
@@ -59,9 +61,18 @@ export class ShowRepository implements Repository<Show> {
     return show;
   }
   async update(id: Show["id"], value: Create<Show>): Promise<Show> {
-    const [updatedShow] = await db.update(shows).set(value).where(
-      eq(shows.id, id),
-    ).returning();
+    console.log("Update called with value:", value);
+    console.log("Update called with id:", id);
+    
+    // Direkt das Datum-Objekt erstellen
+    const [updatedShow] = await db.update(shows)
+        .set({
+            movie_id: value.movie_id,
+            hall_id: value.hall_id,
+            start_time: new Date(value.start_time)
+        })
+        .where(eq(shows.id, id))
+        .returning();
     return updatedShow;
   }
 }

@@ -23,6 +23,7 @@ export class ShowController implements Controller<Show> {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
+        console.log("Controller getOne called");
         const show = await showRepository.find(id);
         if (show) {
             ctx.response.body = show;
@@ -92,6 +93,7 @@ export class ShowController implements Controller<Show> {
     }
 
     async delete(ctx: Context): Promise<void> {
+        console.log("Delete called");
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
