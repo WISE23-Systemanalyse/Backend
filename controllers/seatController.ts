@@ -71,28 +71,26 @@ export class SeatController implements Controller<Seat> {
         ctx.response.status = 400;
         ctx.response.body = { message: "Row, number and hallId are required" };
         return;
-        
-        }
+      }
     } catch (e) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: "Invalid JSON" };
-        return;
-        }
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid JSON" };
+      return;
+    }
     const seat = await seatRepository.update(id, contextSeat);
     ctx.response.status = 200;
     ctx.response.body = seat;
+  }
+  async delete(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
     }
-    async delete(ctx: Context): Promise<void> {
-        const { id } = ctx.params;
-        if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Id parameter is required" };
-            return;
-        }
-        await seatRepository.delete(id);
-        ctx.response.status = 204;
-      }
-      
+    await seatRepository.delete(id);
+    ctx.response.status = 204;
+  }
 
   async bulkCreate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
     const value = await ctx.request.body;
@@ -111,7 +109,7 @@ export class SeatController implements Controller<Seat> {
 
     try {
       const createdSeats = await Promise.all(
-        seats.map(seat => seatRepository.create(seat))
+        seats.map((seat) => seatRepository.create(seat)),
       );
       ctx.response.status = 201;
       ctx.response.body = createdSeats;
@@ -138,7 +136,7 @@ export class SeatController implements Controller<Seat> {
 
     try {
       const updatedSeats = await Promise.all(
-        seats.map(seat => seatRepository.update(seat.id, seat))
+        seats.map((seat) => seatRepository.update(seat.id, seat)),
       );
       ctx.response.body = updatedSeats;
     } catch (error) {
@@ -158,12 +156,14 @@ export class SeatController implements Controller<Seat> {
     const seatIds = await value.json();
     if (!Array.isArray(seatIds)) {
       ctx.response.status = 400;
-      ctx.response.body = { message: "Request body must be an array of seat IDs" };
+      ctx.response.body = {
+        message: "Request body must be an array of seat IDs",
+      };
       return;
     }
 
     try {
-      await Promise.all(seatIds.map(id => seatRepository.delete(id)));
+      await Promise.all(seatIds.map((id) => seatRepository.delete(id)));
       ctx.response.status = 204;
     } catch (error) {
       ctx.response.status = 400;
@@ -171,7 +171,9 @@ export class SeatController implements Controller<Seat> {
     }
   }
 
-  async syncHallSeats(ctx: RouterContext<"/seats/halls/:hallId/sync">): Promise<void> {
+  async syncHallSeats(
+    ctx: RouterContext<"/seats/halls/:hallId/sync">,
+  ): Promise<void> {
     const { hallId } = ctx.params;
     if (!hallId) {
       ctx.response.status = 400;
@@ -199,10 +201,10 @@ export class SeatController implements Controller<Seat> {
 
       // Erstelle die neuen Sitze
       const createdSeats = await Promise.all(
-        newSeats.map(seat => ({
+        newSeats.map((seat) => ({
           ...seat,
-          hall_id: Number(hallId)
-        })).map(seat => seatRepository.create(seat))
+          hall_id: Number(hallId),
+        })).map((seat) => seatRepository.create(seat)),
       );
 
       ctx.response.status = 201;
@@ -211,6 +213,22 @@ export class SeatController implements Controller<Seat> {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
+  }
+  async reserve(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+
+    const seat = await seatRepository.find(id);
+    if (!seat) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Seat not found" };
+      return;
+    }
+    
   }
 }
 

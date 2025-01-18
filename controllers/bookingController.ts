@@ -33,7 +33,6 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    
     const contextBooking:Booking = await value.json();
     try {
       if(!contextBooking.seat_id || !contextBooking.show_id || !contextBooking.user_id || !contextBooking.payment_id) {
