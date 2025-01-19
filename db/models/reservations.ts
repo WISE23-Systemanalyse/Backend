@@ -1,13 +1,17 @@
 import { pgTable, serial, varchar, integer, timestamp } from "drizzle-orm/pg-core";
 import { seats } from "./seats.ts";
 import { users } from "./users.ts";
+import { shows } from "./shows.ts";
 
 export const reservations = pgTable("reservation", {
     id: serial("id").notNull().unique().primaryKey(),
     seat_id: integer("seat_id").notNull().references(() => seats.id, {
       onDelete: "cascade", // Optional: Löscht die Reservierung, wenn der Sitz gelöscht wird
     }),
-    user_id: integer("user_id").references(() => users.id, {
+    show_id: integer("show_id").notNull().references(() => shows.id, {
+      onDelete: "cascade", // Optional: Löscht die Reservierung, wenn die Show gelöscht wird
+    }),
+    user_id: varchar("user_id").references(() => users.id, {
       onDelete: "cascade", // Optional: Löscht die Reservierung, wenn der Benutzer gelöscht wird
     }),
     guest_email: varchar("guest_email", { length: 255 }),

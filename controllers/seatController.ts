@@ -1,16 +1,20 @@
-import { Context } from "https://deno.land/x/oak@v17.1.4/mod.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
-import type { RouterContext } from "https://deno.land/x/oak/mod.ts";
+import { reservationServiceObj } from "../services/reservationService.ts";
+import { Create } from "../interfaces/repository.ts";
+import { Reservation } from "../db/models/reservations.ts";
+import { ApiError } from "../Errors/index.ts";
+import { SeatNotAvailable } from "../Errors/SeatErrors.ts";
 
 export class SeatController implements Controller<Seat> {
-  async getAll(ctx: Context): Promise<void> {
+  async getAll(ctx: RouterContext<string>): Promise<void> {
     const seats = await seatRepository.findAll();
     ctx.response.body = seats;
   }
 
-  async getOne(ctx: Context): Promise<void> {
+  async getOne(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -26,7 +30,7 @@ export class SeatController implements Controller<Seat> {
     }
   }
 
-  async create(ctx: Context): Promise<void> {
+  async create(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -51,7 +55,7 @@ export class SeatController implements Controller<Seat> {
     ctx.response.body = seat;
   }
 
-  async update(ctx: Context): Promise<void> {
+  async update(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -214,21 +218,22 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: error.message };
     }
   }
-  async reserve(ctx: Context): Promise<void> {
+  async reserve(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-
-    const seat = await seatRepository.find(id);
-    if (!seat) {
-      ctx.response.status = 404;
-      ctx.response.body = { message: "Seat not found" };
-      return;
+    try {
+      const ReqeustObj: any = await ctx.request.body.json()
+      const response = await reservationServiceObj.create(ReqeustObj)
+      ctx.response.status = 201
+      ctx.response.body = { message: response};
+    } catch (e: unknown) {
+      ctx.response.status = e.status || 500;
+      ctx.response.body = { message: e.message || "Internal Server Error" };
     }
-    
   }
 }
 
