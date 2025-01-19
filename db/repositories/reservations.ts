@@ -5,13 +5,13 @@ import { and, eq, gte, lte } from "drizzle-orm";
 import { shows } from "../models/shows.ts";
 import { seats } from "../models/seats.ts";
 import { users } from "../models/users.ts";
+import { bookings } from "../models/bookings.ts";
 import {
   SeatNotAvailable,
   SeatNotFound,
   ShowNotFound,
+  UserNotFound,
 } from "../../Errors/index.ts";
-import { InternalServerError } from "../../Errors/InternalServerErrors.ts";
-import { UserNotFound } from "../../Errors/UserErrors.ts";
 
 const RESERVATION_TIME = 0.9*60*1000
 
@@ -47,6 +47,18 @@ export class ReservationRepository implements Repository<Reservation> {
         });
         if (!show) {
           throw new ShowNotFound();
+        }
+
+        // check if seat is not booked
+        const booking = await tx.query.bookings.findFirst({
+          where: and(
+            eq(bookings.seat_id, value.seat_id),
+            eq(bookings.show_id, value.show_id),
+          ),
+        });
+
+        if (booking) {
+          throw new SeatNotAvailable();
         }
 
         // Check if user exists

@@ -3,10 +3,6 @@ import { Controller } from "../interfaces/controller.ts";
 import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
 import { reservationServiceObj } from "../services/reservationService.ts";
-import { Create } from "../interfaces/repository.ts";
-import { Reservation } from "../db/models/reservations.ts";
-import { ApiError } from "../Errors/index.ts";
-import { SeatNotAvailable } from "../Errors/SeatErrors.ts";
 
 export class SeatController implements Controller<Seat> {
   async getAll(ctx: RouterContext<string>): Promise<void> {
