@@ -13,7 +13,7 @@ import {
   UserNotFound,
 } from "../../Errors/index.ts";
 
-const RESERVATION_TIME = 0.9*60*1000
+const RESERVATION_TIME = 10*60*1000 // 10 minute in milliseconds
 
 export class ReservationRepository implements Repository<Reservation> {
   async findAll(): Promise<Reservation[]> {
@@ -26,6 +26,14 @@ export class ReservationRepository implements Repository<Reservation> {
     });
     return result ?? null;
   }
+
+  async findByShowId(showId: Reservation["show_id"]): Promise<Reservation[]> {
+    const result = await db.select()
+      .from(reservations)
+      .where(eq(reservations.show_id, showId));
+    return result;
+  }
+
   async delete(id: Reservation["id"]): Promise<void> {
     await db.delete(reservations).where(eq(reservations.id, id));
   }
@@ -63,7 +71,6 @@ export class ReservationRepository implements Repository<Reservation> {
 
         // Check if user exists
         if(value.user_id !== null && value.user_id !== undefined) {
-          console.log(value.user_id)  
           const user = await tx.query.users.findFirst({
             where: eq(users.id, value.user_id),
           });

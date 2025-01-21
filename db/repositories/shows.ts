@@ -36,8 +36,6 @@ export class ShowRepository implements Repository<Show> {
             )
             // Sortiert nach Startzeit aufsteigend
             .orderBy(shows.start_time);
-
-        console.log(allShows);
         return allShows;
     } catch (error) {
         console.error('Error in findAllWithDetails:', error);
@@ -55,7 +53,6 @@ export class ShowRepository implements Repository<Show> {
     await db.delete(shows).where(eq(shows.id, id));
   }
   async create(value: any): Promise<Show> {
-    console.log(value);
     const [show] = await db.insert(shows).values(value).returning();
     return show;
   }
@@ -83,4 +80,4 @@ export class ShowRepository implements Repository<Show> {
   }
 }
 
-export const showRepository = new ShowRepository();
+export const showRepositoryObj = new ShowRepository();

@@ -24,6 +24,10 @@ export class ReservationService {
   async getAllReservations() {
     return await ReservationRepositoryObj.findAll();
   }
+
+  async getReservationsByShowId(showId: number) {
+    return await ReservationRepositoryObj.findByShowId(showId);
+  }
     
 }
 

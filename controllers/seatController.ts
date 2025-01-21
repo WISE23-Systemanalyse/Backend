@@ -1,12 +1,12 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { seatRepository } from "../db/repositories/seats.ts";
+import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
 import { reservationServiceObj } from "../services/reservationService.ts";
 
 export class SeatController implements Controller<Seat> {
   async getAll(ctx: RouterContext<string>): Promise<void> {
-    const seats = await seatRepository.findAll();
+    const seats = await seatRepositoryObj.findAll();
     ctx.response.body = seats;
   }
 
@@ -17,7 +17,7 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const seat = await seatRepository.find(id);
+    const seat = await seatRepositoryObj.find(id);
     if (seat) {
       ctx.response.body = seat;
     } else {
@@ -46,7 +46,7 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const seat = await seatRepository.create(contextSeat);
+    const seat = await seatRepositoryObj.create(contextSeat);
     ctx.response.status = 201;
     ctx.response.body = seat;
   }
@@ -77,7 +77,7 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const seat = await seatRepository.update(id, contextSeat);
+    const seat = await seatRepositoryObj.update(id, contextSeat);
     ctx.response.status = 200;
     ctx.response.body = seat;
   }
@@ -88,7 +88,7 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await seatRepository.delete(id);
+    await seatRepositoryObj.delete(id);
     ctx.response.status = 204;
   }
 
@@ -109,7 +109,7 @@ export class SeatController implements Controller<Seat> {
 
     try {
       const createdSeats = await Promise.all(
-        seats.map((seat) => seatRepository.create(seat)),
+        seats.map((seat) => seatRepositoryObj.create(seat)),
       );
       ctx.response.status = 201;
       ctx.response.body = createdSeats;
@@ -136,7 +136,7 @@ export class SeatController implements Controller<Seat> {
 
     try {
       const updatedSeats = await Promise.all(
-        seats.map((seat) => seatRepository.update(seat.id, seat)),
+        seats.map((seat) => seatRepositoryObj.update(seat.id, seat)),
       );
       ctx.response.body = updatedSeats;
     } catch (error) {
@@ -163,7 +163,7 @@ export class SeatController implements Controller<Seat> {
     }
 
     try {
-      await Promise.all(seatIds.map((id) => seatRepository.delete(id)));
+      await Promise.all(seatIds.map((id) => seatRepositoryObj.delete(id)));
       ctx.response.status = 204;
     } catch (error) {
       ctx.response.status = 400;
@@ -197,14 +197,14 @@ export class SeatController implements Controller<Seat> {
 
     try {
       // Lösche alle existierenden Sitze des Saals
-      await seatRepository.deleteByHallId(hallId);
+      await seatRepositoryObj.deleteByHallId(hallId);
 
       // Erstelle die neuen Sitze
       const createdSeats = await Promise.all(
         newSeats.map((seat) => ({
           ...seat,
           hall_id: Number(hallId),
-        })).map((seat) => seatRepository.create(seat)),
+        })).map((seat) => seatRepositoryObj.create(seat)),
       );
 
       ctx.response.status = 201;

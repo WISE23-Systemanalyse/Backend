@@ -1,7 +1,7 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { hallRepository } from "../db/repositories/halls.ts";
-import { seatRepository } from "../db/repositories/seats.ts";
+import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { Hall } from "../db/models/halls.ts";
 
 export class HallController implements Controller<Hall> {
@@ -39,7 +39,7 @@ export class HallController implements Controller<Hall> {
       ctx.response.body = { message: "Hall not found" };
       return;
     }
-    const seats = await seatRepository.findByHallId(id);
+    const seats = await seatRepositoryObj.findByHallId(id);
     ctx.response.body = seats;
   }
   async create(ctx: Context): Promise<void> {

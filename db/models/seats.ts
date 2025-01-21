@@ -9,7 +9,7 @@ export const seats = pgTable("seat", {
     }),
     row_number: integer("row_number").notNull(),
     seat_number: integer("seat_number").notNull(),
-    seat_type: varchar("seat_type", { length: 50 }), // z.B. 'STANDARD' | 'PREMIUM' | 'VIP' | 'NONE' | 
+    seat_type: varchar("seat_type", { length: 50 }), // z.B. 'STANDARD' | 'PREMIUM' | 'VIP' | 'NONE' | 'BOOKED'
   });
 
 

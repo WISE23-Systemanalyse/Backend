@@ -1,6 +1,6 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { movieRepository, showRepository } from "../db/repositories/index.ts";
+import { movieRepository, showRepositoryObj } from "../db/repositories/index.ts";
 import { Movie } from "../db/models/movies.ts";
 import { TMDBService } from "../services/tmdbService.ts";
 
@@ -185,7 +185,7 @@ export class MovieController implements Controller<Movie> {
     }
     const movie = await movieRepository.find(Number(id));
     if (movie) {
-      const shows = await showRepository.findByMovieId(Number(id));
+      const shows = await showRepositoryObj.findByMovieId(Number(id));
       ctx.response.body = shows;
     } else {
       ctx.response.status = 404;

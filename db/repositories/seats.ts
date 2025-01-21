@@ -2,7 +2,9 @@ import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
 import { seats, Seat } from "../models/seats.ts";
 import { eq } from "drizzle-orm";
-
+import { ReservationRepositoryObj } from "./reservations.ts";
+import { bookingRepositoryObj } from "./bookings.ts";
+import { Hall } from "../models/halls.ts";
 export class SeatRepository implements Repository<Seat> {
     async findAll(): Promise<Seat[]> {
         const allSeats = await db.select().from(seats);
@@ -14,13 +16,15 @@ export class SeatRepository implements Repository<Seat> {
           });
           return result ?? null;
     }
-    async findByHallId(hallId: string): Promise<Seat[]> {
+    async findByHallId(hallId: Hall["id"]): Promise<Seat[]> {
         const result = await db.select()
             .from(seats)
             .where(eq(seats.hall_id, Number(hallId)))
             .orderBy(seats.row_number, seats.seat_number);
+        
         return result;
     }
+    
     async delete(id: Seat['id']): Promise<void> {
         await db.delete(seats).where(eq(seats.id, id));
     }
@@ -37,4 +41,4 @@ export class SeatRepository implements Repository<Seat> {
     }
 }
 
-export const seatRepository = new SeatRepository();
+export const seatRepositoryObj = new SeatRepository();
