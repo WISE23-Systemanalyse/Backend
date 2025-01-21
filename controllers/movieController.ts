@@ -1,9 +1,8 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { movieRepository } from "../db/repositories/movies.ts";
+import { movieRepository, showRepositoryObj } from "../db/repositories/index.ts";
 import { Movie } from "../db/models/movies.ts";
 import { TMDBService } from "../services/tmdbService.ts";
-import { eq } from "drizzle-orm";
 
 export class MovieController implements Controller<Movie> {
   async getAll(ctx: Context): Promise<void> {
@@ -176,6 +175,22 @@ export class MovieController implements Controller<Movie> {
 
     const updatedMovie = await movieRepository.update(Number(id), { ...movie, genres });
     ctx.response.body = updatedMovie;
+  }
+  async getShowsByMovieId(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
+    }
+    const movie = await movieRepository.find(Number(id));
+    if (movie) {
+      const shows = await showRepositoryObj.findByMovieId(Number(id));
+      ctx.response.body = shows;
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Movie not found" };
+    }
   }
 }
 

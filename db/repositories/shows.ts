@@ -1,9 +1,9 @@
 import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
-import { Show, shows} from "../models/shows.ts";
+import { Show, shows, ShowWithDetails} from "../models/shows.ts";
 import { movies } from "../models/movies.ts";
 import { halls } from "../models/halls.ts";
-import { eq, gte } from "drizzle-orm";
+import { eq, gte, and } from "drizzle-orm";
 
 export class ShowRepository implements Repository<Show> {
   async findAll(): Promise<Show[]> {
@@ -36,14 +36,13 @@ export class ShowRepository implements Repository<Show> {
             )
             // Sortiert nach Startzeit aufsteigend
             .orderBy(shows.start_time);
-
-        console.log(allShows);
         return allShows;
     } catch (error) {
         console.error('Error in findAllWithDetails:', error);
         throw error;
     }
   }
+ 
   async find(id: Show["id"]): Promise<Show | null> {
     console.log("Repository find called");
     const result = await db.query.shows.findFirst({
@@ -56,7 +55,6 @@ export class ShowRepository implements Repository<Show> {
     await db.delete(shows).where(eq(shows.id, id));
   }
   async create(value: any): Promise<Show> {
-    console.log(value);
     const [show] = await db.insert(shows).values(value).returning();
     return show;
   }
@@ -75,6 +73,22 @@ export class ShowRepository implements Repository<Show> {
         .returning();
     return updatedShow;
   }
+  async findByMovieId(movieId: Show["movie_id"]): Promise<{ show_id: number, hall_id: number, hall_name: string, start_time: Date }[]> {
+    const result = await db
+      .select({
+        show_id: shows.id,
+        hall_id: shows.hall_id,
+        hall_name: halls.name,
+        start_time: shows.start_time,
+      })
+      .from(shows)
+      .leftJoin(movies, eq(shows.movie_id, movies.id))
+      .leftJoin(halls, eq(shows.hall_id, halls.id))
+      .where(and(eq(shows.movie_id, movieId), gte(shows.start_time, new Date())))
+      .orderBy(shows.start_time);
+
+    return result;
+  }
 }
 
-export const showRepository = new ShowRepository();
+export const showRepositoryObj = new ShowRepository();
