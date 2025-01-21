@@ -8,6 +8,7 @@ import { reservationServiceObj } from "../services/reservationService.ts";
 
 export class ShowController implements Controller<Show> {
   async getAll(ctx: Context): Promise<void> {
+    console.log("Get all shows called");
     const shows = await showRepositoryObj.findAll();
     ctx.response.body = shows;
   }
@@ -24,6 +25,7 @@ export class ShowController implements Controller<Show> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
+    console.log("Controller getOne called");
     const show = await showRepositoryObj.find(id);
     if (show) {
       ctx.response.body = show;
@@ -59,7 +61,6 @@ export class ShowController implements Controller<Show> {
       return;
     }
 
-    // Convert start_time to a Date object
     const startTime = new Date(start_time);
     if (isNaN(startTime.getTime())) {
       ctx.response.status = 400;
@@ -112,6 +113,7 @@ export class ShowController implements Controller<Show> {
   }
 
   async delete(ctx: Context): Promise<void> {
+    console.log("Delete called");
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -127,6 +129,7 @@ export class ShowController implements Controller<Show> {
       ctx.response.body = { message: "Show not found" };
     }
   }
+
   async getBookingsByShowId(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {

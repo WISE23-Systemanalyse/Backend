@@ -1,4 +1,4 @@
-import { pgTable, varchar, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, integer } from "drizzle-orm/pg-core";
 import { movies } from "./movies.ts"; 
 import { halls } from "./halls.ts";   
 
