@@ -7,5 +7,7 @@ import {showRoutes } from "./showRoutes.ts";
 import { hallRoutes } from "./hallRoutes.ts";
 import { paymentRoutes } from "./paymentRoutes.ts";
 import { seatRoutes } from "./seatRoutes.ts";
+import { newsletterRoutes } from "./newsletterRoutes.ts";
+import { contactRoutes } from "./contactRoutes.ts";
 
-export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes, seatRoutes};
+export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes, seatRoutes, newsletterRoutes, contactRoutes };

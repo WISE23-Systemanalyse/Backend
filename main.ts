@@ -1,5 +1,10 @@
 import { Application } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
+import { load } from "https://deno.land/std@0.204.0/dotenv/mod.ts";
+
+// Lade .env Datei BEVOR andere Imports
+await load({ export: true });
+
 import { 
     statusRoutes,
     userRoutes,
@@ -9,9 +14,10 @@ import {
     bookingRoutes,
     hallRoutes,
     paymentRoutes,
-    seatRoutes
-}
-from "./routes/index.ts";
+    seatRoutes,
+    newsletterRoutes,
+    contactRoutes
+} from "./routes/index.ts";
 
 const app = new Application();
 
@@ -42,6 +48,12 @@ app.use(paymentRoutes.allowedMethods());
 
 app.use(seatRoutes.allowedMethods());
 app.use(seatRoutes.routes());
+
+app.use(newsletterRoutes.routes());
+app.use(newsletterRoutes.allowedMethods());
+
+app.use(contactRoutes.routes());
+app.use(contactRoutes.allowedMethods());
 
 app.use(webhookRouter.routes());
 
