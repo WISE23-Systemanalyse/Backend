@@ -35,7 +35,7 @@ export class UserRepository implements Repository<User> {
             where: eq(users.email, email),
           });
         if (!result) return null;
-        return user;
+        return result;
     }
 } 
 
