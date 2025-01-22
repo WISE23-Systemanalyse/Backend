@@ -1,12 +1,12 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { bookingRepository } from "../db/repositories/bookings.ts";
+import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { Booking } from "../db/models/bookings.ts";
 
 
 export class BookingController implements Controller<Booking> {
   async getAll(ctx: Context): Promise<void> {
-    const bookings = await bookingRepository.findAll();
+    const bookings = await bookingRepositoryObj.findAll();
     ctx.response.body = bookings;
   }
 
@@ -17,7 +17,7 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const booking = await bookingRepository.find(id);
+    const booking = await bookingRepositoryObj.find(id);
     if (booking) {
       ctx.response.body = booking;
     } else {
@@ -33,7 +33,6 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    
     const contextBooking:Booking = await value.json();
     try {
       if(!contextBooking.seat_id || !contextBooking.show_id || !contextBooking.user_id || !contextBooking.payment_id) {
@@ -47,7 +46,7 @@ export class BookingController implements Controller<Booking> {
       return;
     }
   
-    const booking = await bookingRepository.create( contextBooking );
+    const booking = await bookingRepositoryObj.create( contextBooking );
     ctx.response.status = 201;
     ctx.response.body = booking;
   }
@@ -78,7 +77,7 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = { message: "Invalid JSON" };
         return;
         }
-    const booking = await bookingRepository.update(id, contextBooking);
+    const booking = await bookingRepositoryObj.update(id, contextBooking);
     ctx.response.status = 200;
     ctx.response.body = booking;
     }
@@ -90,9 +89,9 @@ export class BookingController implements Controller<Booking> {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        const booking = await bookingRepository.find(id);
+        const booking = await bookingRepositoryObj.find(id);
         if (booking) {
-            await bookingRepository.delete(id);
+            await bookingRepositoryObj.delete(id);
             ctx.response.status = 204;
         } else {
             ctx.response.status = 404;
@@ -107,7 +106,7 @@ export class BookingController implements Controller<Booking> {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        const bookings = await bookingRepository.getBookingsByShowId(id);
+        const bookings = await bookingRepositoryObj.getBookingsByShowId(id);
         ctx.response.body = bookings;
     }
 
@@ -118,8 +117,7 @@ export class BookingController implements Controller<Booking> {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        console.log(id);
-        const bookings = await bookingRepository.getBookingsByUserId(id);
+        const bookings = await bookingRepositoryObj.getBookingsByUserId(id);
         ctx.response.body = bookings;
     }
 

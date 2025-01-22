@@ -37,4 +37,4 @@ export class BookingRepository implements Repository<Booking> {
     }
 }
 
-export const bookingRepository = new BookingRepository();
+export const bookingRepositoryObj = new BookingRepository();
