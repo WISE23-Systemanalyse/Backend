@@ -1,4 +1,4 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 
 const statusController = {
   // Status Route: Gibt den Status der App zurück

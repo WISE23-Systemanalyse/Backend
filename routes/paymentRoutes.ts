@@ -1,4 +1,4 @@
-import { Router } from "https://deno.land/x/oak/mod.ts";
+import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { paymentController } from "../controllers/index.ts";
 
 const paymentRoutes = new Router();

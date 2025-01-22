@@ -1,4 +1,4 @@
-import { Router } from "https://deno.land/x/oak/mod.ts";
+import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Webhook } from "https://esm.sh/svix@0.73.0";
 import { WebhookEvent } from "https://esm.sh/@clerk/backend";
 import { db } from "../db/db.ts";
