@@ -6,6 +6,8 @@ import {showRoutes } from "./showRoutes.ts";
 import { hallRoutes } from "./hallRoutes.ts";
 import { paymentRoutes } from "./paymentRoutes.ts";
 import { seatRoutes } from "./seatRoutes.ts";
+import { newsletterRoutes } from "./newsletterRoutes.ts";
+import { contactRoutes } from "./contactRoutes.ts";
 import { accountRoutes } from "./accountRoutes.ts";
 import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 
@@ -35,8 +37,15 @@ routers.use(paymentRoutes.allowedMethods());
 routers.use(seatRoutes.routes());
 routers.use(seatRoutes.allowedMethods());
 
+routers.use(newsletterRoutes.routes());
+routers.use(newsletterRoutes.allowedMethods());
+
+routers.use(contactRoutes.routes());
+routers.use(contactRoutes.allowedMethods());
+
 routers.use(accountRoutes.routes());
 routers.use(accountRoutes.allowedMethods());
 
-export { routers };
+export { routers };	
+
 

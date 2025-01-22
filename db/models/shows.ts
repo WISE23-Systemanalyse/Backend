@@ -1,4 +1,4 @@
-import { pgTable, varchar, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, integer } from "drizzle-orm/pg-core";
 import { movies } from "./movies.ts"; 
 import { halls } from "./halls.ts";   
 
@@ -11,7 +11,6 @@ export const shows = pgTable("show", {
     onDelete: "cascade", // Wenn der Saal gelöscht wird, werden die Shows auch gelöscht
   }),
   start_time: timestamp("start_time").notNull(),
-  
 });
 
 export type Show = typeof shows.$inferSelect;
