@@ -29,6 +29,14 @@ export class UserRepository implements Repository<User> {
         const [updatedUser] = await db.update(users).set(value).where(eq(users.id, id)).returning();
         return updatedUser;
     }
+
+    async findByEmail(email: User['email']): Promise<User | null> {
+        const result = await db.query.users.findFirst({
+            where: eq(users.email, email),
+          });
+        if (!result) return null;
+        return user;
+    }
 } 
 
 export const userRepository = new UserRepository();
