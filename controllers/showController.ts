@@ -1,4 +1,4 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { showRepository } from "../db/repositories/shows.ts";
 import { Show } from "../db/models/shows.ts";

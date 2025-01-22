@@ -1,9 +1,7 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { seatRepository } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
-import type { RouterContext } from "https://deno.land/x/oak/mod.ts";
-
 export class SeatController implements Controller<Seat> {
   async getAll(ctx: Context): Promise<void> {
     const seats = await seatRepository.findAll();
