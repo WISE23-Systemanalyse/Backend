@@ -33,22 +33,16 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    const contextBooking:Booking = await value.json();
+    const contextBooking = await value.json();
+
     try {
-      if(!contextBooking.seat_id || !contextBooking.show_id || !contextBooking.user_id || !contextBooking.payment_id) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: "SeatId, ShowId, UserId and PaymentId are required" };
-        return;
-      }
-    } catch (e) {
+      const bookings = await bookingRepositoryObj.create(contextBooking);
+      ctx.response.status = 201;
+      ctx.response.body = { message: "Bookings created" };
+    } catch (error) {
       ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid JSON" };
-      return;
+      ctx.response.body = { message: error.message };
     }
-  
-    const booking = await bookingRepositoryObj.create( contextBooking );
-    ctx.response.status = 201;
-    ctx.response.body = booking;
   }
 
   async update(ctx: Context): Promise<void> {
@@ -64,64 +58,64 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    const contextBooking:Booking = await value.json();
+    const contextBooking: Booking = await value.json();
     try {
       const { id, show_id, user_id } = contextBooking;
       if (!id || !show_id || !user_id) {
         ctx.response.status = 400;
-        ctx.response.body = { message: "BookingId, showId and userId are required" };
+        ctx.response.body = {
+          message: "BookingId, showId and userId are required",
+        };
         return;
-        }
+      }
     } catch (e) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: "Invalid JSON" };
-        return;
-        }
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid JSON" };
+      return;
+    }
     const booking = await bookingRepositoryObj.update(id, contextBooking);
     ctx.response.status = 200;
     ctx.response.body = booking;
+  }
+
+  async delete(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
     }
-
-    async delete(ctx: Context): Promise<void> {
-        const { id } = ctx.params;
-        if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Id parameter is required" };
-            return;
-        }
-        const booking = await bookingRepositoryObj.find(id);
-        if (booking) {
-            await bookingRepositoryObj.delete(id);
-            ctx.response.status = 204;
-        } else {
-            ctx.response.status = 404;
-            ctx.response.body = { message: "Booking not found" };
-        }
+    const booking = await bookingRepositoryObj.find(id);
+    if (booking) {
+      await bookingRepositoryObj.delete(id);
+      ctx.response.status = 204;
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Booking not found" };
     }
+  }
 
-    async getBookingsByShowId(ctx: Context): Promise<void> {
-        const { id } = ctx.params;
-        if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Id parameter is required" };
-            return;
-        }
-        const bookings = await bookingRepositoryObj.getBookingsByShowId(id);
-        ctx.response.body = bookings;
+  async getBookingsByShowId(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
     }
+    const bookings = await bookingRepositoryObj.getBookingsByShowId(id);
+    ctx.response.body = bookings;
+  }
 
-    async getBookingsByUserId(ctx: Context): Promise<void> {
-        const { id } = ctx.params;
-        if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Id parameter is required" };
-            return;
-        }
-        const bookings = await bookingRepositoryObj.getBookingsByUserId(id);
-        ctx.response.body = bookings;
+  async getBookingsByUserId(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
     }
-
-
+    const bookings = await bookingRepositoryObj.getBookingsByUserId(id);
+    ctx.response.body = bookings;
+  }
 }
 
 export const bookingController = new BookingController();

@@ -27,7 +27,8 @@ export class PaymentController implements Controller<Payment> {
   }
 
   async create(ctx: Context): Promise<void> {
-    const value = await ctx.request.body;
+    try {
+      const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Request body is required" };
@@ -49,8 +50,11 @@ export class PaymentController implements Controller<Payment> {
     const payment = await paymentRepository.create(contextPayment);
     ctx.response.status = 201;
     ctx.response.body = payment;
+    } catch (error) {
+      ctx.response.status = 500;
+      ctx.response.body = { message: error.message };
+    }
   }
-
   async update(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
