@@ -1,5 +1,6 @@
 import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { userController, bookingController } from "../controllers/index.ts";
+import { authMiddleware } from "../middleware/auth.ts";
 
 
 const userRoutes = new Router();
