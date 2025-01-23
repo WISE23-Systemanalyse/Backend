@@ -9,5 +9,5 @@ import { seatController } from "./seatController.ts";
 import { newsletterController } from "./newsletterController.ts";
 import { contactController } from "./contactController.ts";
 
-export { movieController, bookingController, statusController, userController, showController, hallController, paymentController, seatController, newsletterController, contactController };
+export { movieController, bookingController, statusController, userController, showControllerObj, hallController, paymentController, seatController, newsletterController, contactController };
 
