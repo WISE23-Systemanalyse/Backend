@@ -22,10 +22,14 @@ export class UserRepository implements Repository<User> {
         await db.delete(users).where(eq(users.id, id));
     }
     async create(value: Create<User>): Promise<User> {
-      const [user] = await db.insert(users).values(value).returning();
-      return user;
+      try {
+        const [user] = await db.insert(users).values(value).returning();
+        return user;
+      } catch (error) {
+        throw error;
+      }
     }
-    async update(id: User['id'], value: Create<User>): Promise<User> {
+    async update(id: User['id'], value: any): Promise<User> {
         const [updatedUser] = await db.update(users).set(value).where(eq(users.id, id)).returning();
         return updatedUser;
     }
@@ -39,4 +43,4 @@ export class UserRepository implements Repository<User> {
     }
 } 
 
-export const userRepository = new UserRepository();
+export const userRepositoryObj = new UserRepository();

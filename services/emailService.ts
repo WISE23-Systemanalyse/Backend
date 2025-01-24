@@ -15,6 +15,10 @@ function getNewsletterTemplate(email: string) {
     return `<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px}.container{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.1)}h1{color:#333}p{color:#555}.footer{margin-top:20px;font-size:12px;color:#999}</style></head><body><div class="container"><h1>Willkommen zu unserem Newsletter!</h1><p>Vielen Dank, dass Sie sich für unseren Newsletter angemeldet haben. Wir freuen uns, Sie in unserer Community willkommen zu heißen!</p><p>In unserem Newsletter erwarten Sie:</p><ul><li>Exklusive Angebote und Rabatte</li><li>Neueste Nachrichten und Updates</li><li>Einblicke in kommende Produkte und Veranstaltungen</li></ul><p>Bleiben Sie dran und verpassen Sie keine Neuigkeiten!</p><p>Mit freundlichen Grüßen,<br>Ihr CinemaPlus Team</p></div></body></html>`;
 }
 
+function generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
 export class EmailService {
     private client: SMTPClient;
     private readonly username = "cinemaplus1995@gmail.com";
@@ -63,6 +67,32 @@ export class EmailService {
             throw error;
         }
     }
+
+    async sendVerificationMail(email: string): Promise<string> {
+        const verificationCode = generateVerificationCode();
+        
+        try {
+          await this.client.send({
+            from: this.username,
+            to: email,
+            subject: 'Email Verifizierung',
+            html: `
+              <h1>Ihr Verifizierungscode</h1>
+              <p>Bitte geben Sie den folgenden Code ein, um Ihre Email-Adresse zu verifizieren:</p>
+              <h2 style="font-size: 24px; letter-spacing: 5px; background: #f4f4f4; padding: 10px; text-align: center;">
+                ${verificationCode}
+              </h2>
+              <p>Der Code ist 10 Minuten gültig.</p>
+            `,
+          });
+    
+          return verificationCode;
+        } catch (error) {
+          console.error("Fehler beim Senden der Verifikations-Email:", error);
+          throw error;
+        }
+      }
+
 }
 
-export const emailService = new EmailService(); 
+export const emailServiceObj = new EmailService(); 

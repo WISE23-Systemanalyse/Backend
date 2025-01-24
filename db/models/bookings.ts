@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, timestamp, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, timestamp, integer } from "drizzle-orm/pg-core";
 import { users } from "./users.ts"; 
 import { shows } from "./shows.ts"; 
 import { seats } from "./seats.ts"; 
@@ -6,7 +6,7 @@ import { payments } from "./payments.ts";
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey().unique().notNull(),
-  user_id: uuid("user_id").notNull().references(() => users.id, {
+  user_id: varchar("user_id").notNull().references(() => users.id, {
     onDelete: "cascade", // Löscht Buchungen, wenn der User gelöscht wird
   }),
   show_id: integer("show_id").notNull().references(() => shows.id, {

@@ -1,23 +1,21 @@
 import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { create, verify } from "https://deno.land/x/djwt@v2.2/mod.ts";
-import { users } from "../db/models/users.ts";
-import { db } from "../db/db.ts";
-import { userRepository } from "../db/repositories/users.ts";
+import { verify } from "https://deno.land/x/djwt@v2.2/mod.ts";
+import { userAuthServiceObj } from "../services/userAuthService.ts";
+import { userRepositoryObj } from "../db/repositories/users.ts";
 
-const SECRET_KEY = "your-secret-key-at-least-32-chars-long"; // Ersetze durch einen sicheren Schlüssel
 
 export class AccountController {
-  async signup(ctx: RouterContext<'/signup'>): Promise<void> {
+  async signup(ctx: RouterContext<"/signup">): Promise<void> {
     try {
       const body = await ctx.request.body;
-      const { email, password, firstName, lastName, userName, imageUrl, isAdmin } = await body.json();
+      const { email, password, firstName, lastName, userName } = await body
+        .json();
 
-      if (!email || !password) {
+      if (!email || !password || !userName) {
         ctx.response.status = 400;
-        ctx.response.body = { error: "Email and password are required." };
+        ctx.response.body = { error: "Email and password and UserName are required." };
         return;
       }
-
       const newUser = {
         id: crypto.randomUUID(),
         email,
@@ -25,38 +23,53 @@ export class AccountController {
         firstName,
         lastName,
         userName,
-        imageUrl,
-        isAdmin: isAdmin || false,
+        imageUrl: "",
         createdAt: new Date(),
-        updatedAt: new Date(),
+        expireAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        isAdmin: false,
+        isVerified: false,
       };
-
-      await db.insert(users).values(newUser);
-      
-      const token = await create(
-        { alg: "HS256", typ: "JWT" },
-        { id: newUser.id, email: newUser.email },
-        SECRET_KEY
-      );
-
-      ctx.response.status = 201;
-      ctx.response.body = {
-        id: newUser.id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        userName: newUser.userName,
-        imageUrl: newUser.imageUrl,
-        isAdmin: newUser.isAdmin,
-        token,
-      };
+      try {
+        await userAuthServiceObj.register(newUser);
+        ctx.response.status = 201;
+        ctx.response.body = { message: "User created successfully" };
+      } catch (error) {
+        throw error;  
+      }
 
     } catch (error) {
-      ctx.response.status = 500;
+      ctx.response.status = error.status || 500;
       ctx.response.body = { error: error.message };
     }
   }
-  async signin(ctx: RouterContext<'/sigin'>): Promise<void> {
+
+  async verifyEmail(ctx: RouterContext<"/verifyemail">): Promise<void> {
+    try {
+      const body = await ctx.request.body;
+      const { email, code } = await body.json();
+
+      if (!email || !code) {
+        ctx.response.status = 400;
+        ctx.response.body = { error: "Email and code are required." };
+        return;
+      }
+
+      // Führe alle DB-Operationen in einer Transaktion aus
+      try {
+        await userAuthServiceObj.verifyUser(email, code);
+        ctx.response.status = 201;
+        ctx.response.body = { message: "User verified successfully" };
+      } catch (error) {
+        ctx.response.status = error.status || 500;
+        ctx.response.body = { error: error.message };
+      }
+    } catch (error) {
+      ctx.response.status = error.status || 500;
+      ctx.response.body = { error: error.message };
+    }
+  }
+
+  async signin(ctx: RouterContext<"/signin">): Promise<void> {
     try {
       const body = await ctx.request.body;
       const { email, password } = await body.json();
@@ -66,60 +79,41 @@ export class AccountController {
         ctx.response.body = { error: "Email and password are required." };
         return;
       }
-
-      const user = await userRepository.findByEmail(email);
-
-      if (!user || !(await password === user.password)) {
-        ctx.response.status = 401;
-        ctx.response.body = { error: "Invalid email or password." };
-        return;
-      }
-
-      const token = await create(
-        { alg: "HS256", typ: "JWT" },
-        { 
-          id: user.id,
-          email: user.email,
-          userName: user.userName
-        },
-        SECRET_KEY
-      );
-
-      ctx.response.status = 200;
-      ctx.response.body = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        userName: user.userName,
-        imageUrl: user.imageUrl,
-        token
+      try {
+        const token = await userAuthServiceObj.login(email, password);
+        ctx.response.status = 200;
+        ctx.response.body = {
+        "token":token,
       };
+      } catch (error) {
+        ctx.response.status = error.status;
+        ctx.response.body = { error: error.message };
+      }
     } catch (error) {
       ctx.response.status = 500;
-      ctx.response.body = { error: "Internal server error." };
+      ctx.response.body = { error: error.message };
     }
   }
 
-  async me(ctx: RouterContext<'/me'>): Promise<void> {
-    const jwt = await ctx.cookies.get("jwt");
-    console.log(jwt);
-  
+  async me(ctx: RouterContext<"/me">): Promise<void> {
+    const authHeader = ctx.request.headers.get("Authorization");
+    const jwt = authHeader?.split(" ")[1]; // Extract token from "Bearer <token>"
     if (!jwt) {
       ctx.response.status = 401;
-      ctx.response.body = { message: 'unauthenticated' };
+      ctx.response.body = { message: "unauthenticated" };
       return;
     }
-  
+
     try {
-      const payload = await verify(jwt, SECRET_KEY, "HS256");
+      const payload = await verify(jwt, Deno.env.get("JWT_SECRET_KEY")!, "HS256");
+      console.log(payload);
       if (!payload) {
         ctx.response.status = 401;
-        ctx.response.body = { message: 'unauthenticated' };
+        ctx.response.body = { message: "unauthenticated" };
         return;
       }
-  
-      const user = await userRepository.find(payload.id);
+
+      const user = await userRepositoryObj.find(payload.id);
       if (user) {
         ctx.response.status = 200;
         ctx.response.body = { message: user };
@@ -132,7 +126,6 @@ export class AccountController {
       ctx.response.body = { error: "Invalid or expired token." };
     }
   }
-  
 }
 
 export const accountController = new AccountController();

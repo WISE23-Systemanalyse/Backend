@@ -1,9 +1,8 @@
 import { Context } from "https://deno.land/x/oak/mod.ts";
-import { emailService } from "../services/emailService.ts";
+import { emailServiceObj } from "../services/emailService.ts";
 
 export class NewsletterController {
     async subscribe(ctx: Context): Promise<void> {
-        console.log("here");
         const value = await ctx.request.body;
         if (!value) {
             ctx.response.status = 400;
@@ -19,7 +18,7 @@ export class NewsletterController {
         }
 
         try {
-            await emailService.sendNewsletterConfirmation(email);
+            await emailServiceObj.sendNewsletterConfirmation(email);
             ctx.response.status = 200;
             ctx.response.body = { message: "Confirmation email sent" };
         } catch (error) {

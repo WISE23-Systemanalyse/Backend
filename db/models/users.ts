@@ -3,7 +3,7 @@ import { pgTable, varchar, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
 
 
 export const users = pgTable("users", {
-  id: uuid().primaryKey().unique().notNull(),
+  id: varchar("id").primaryKey().unique().notNull(),
   password: varchar("password"),
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
@@ -12,7 +12,8 @@ export const users = pgTable("users", {
   imageUrl: varchar("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  isAdmin: boolean("is_admin"),
+  isAdmin: boolean("is_admin").default(false),
+  isVerified: boolean("is_verified").default(false)
 });
 
 
