@@ -60,12 +60,16 @@ export class UserAuthService {
           id: user.id,
           email: user.email,
           userName: user.userName,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          imageUrl: user.imageUrl,
+          createdAt: user.createdAt,
         },
         Deno.env.get("JWT_SECRET_KEY")!,
       );
-      const { password:_, ...userWithoutPassword } = user;
+      const { password: _password, isAdmin: _isAdmin, ...custonUser } = user;
       return {
-        ...userWithoutPassword,
+        ...custonUser,
         token
       }
     } catch (error) {
