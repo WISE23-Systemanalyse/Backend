@@ -16,7 +16,7 @@ export const bookings = pgTable("bookings", {
     onDelete: "cascade", 
   }),
   booking_time: timestamp("booking_time").defaultNow(), 
-  payment_id: integer("payment_id").notNull().unique().references(() => payments.id, {
+  payment_id: integer("payment_id").notNull().references(() => payments.id, {
     onDelete: "cascade", 
   }),
 });
