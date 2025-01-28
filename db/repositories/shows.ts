@@ -89,6 +89,22 @@ export class ShowRepository implements Repository<Show> {
 
     return result;
   }
+  async findByHallId(hallId: Show["hall_id"]): Promise<{ show_id: number, movie_id: number, hall_id: number, start_time: Date, title: string | null, description: string | null, image_url: string | null }[]> {
+    const result = await db
+      .select({
+        show_id: shows.id,
+        movie_id: shows.movie_id,
+        hall_id: shows.hall_id,
+        start_time: shows.start_time,
+        title: movies.title,
+        description: movies.description,
+        image_url: movies.imageUrl
+      })
+      .from(shows)
+      .leftJoin(movies, eq(shows.movie_id, movies.id))
+      .where(eq(shows.hall_id, hallId));
+    return result;
+  }
 }
 
 export const showRepositoryObj = new ShowRepository();

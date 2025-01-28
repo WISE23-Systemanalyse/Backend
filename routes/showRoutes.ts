@@ -5,6 +5,7 @@ const showRoutes = new Router();
 
 showRoutes
   .get("/shows/details", showControllerObj.getAllWithDetails)
+  .get("/shows/hall/:id", showControllerObj.getShowsByHallId)
   .get("/shows", showControllerObj.getAll)
   .get("/shows/:id", showControllerObj.getOne)
   .get("/shows/:id/seats", showControllerObj.getSeatsWithStatus)
