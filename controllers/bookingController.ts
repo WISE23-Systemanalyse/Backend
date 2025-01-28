@@ -33,22 +33,18 @@ export class BookingController implements Controller<Booking> {
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    const contextBooking:Booking = await value.json();
+
     try {
-      if(!contextBooking.seat_id || !contextBooking.show_id || !contextBooking.user_id || !contextBooking.payment_id) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: "SeatId, ShowId, UserId and PaymentId are required" };
-        return;
-      }
+      const data = await value.json();
+      const booking = await bookingRepositoryObj.create(data);
+
+      ctx.response.status = 201;
+      ctx.response.body = booking;
     } catch (e) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-  
-    const booking = await bookingRepositoryObj.create( contextBooking );
-    ctx.response.status = 201;
-    ctx.response.body = booking;
   }
 
   async update(ctx: Context): Promise<void> {
