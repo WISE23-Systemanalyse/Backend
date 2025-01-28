@@ -3,6 +3,7 @@ import { Create, Repository } from "../../interfaces/repository.ts";
 import { bookings, Booking } from "../models/bookings.ts";
 import { Show } from "../models/shows.ts";
 import { eq } from "drizzle-orm";
+import { Payment } from "../models/payments.ts";
 
 
 export class BookingRepository implements Repository<Booking> {
@@ -34,6 +35,10 @@ export class BookingRepository implements Repository<Booking> {
     async getBookingsByUserId(userId: Booking['user_id']): Promise<Booking[]> {
         const userBookings = await db.select().from(bookings).where(eq(bookings["user_id"], userId));
         return userBookings ?? [];
+    }
+    async getBookingsByPaymentId(paymentId: Payment['id']): Promise<Booking[]> {
+        const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
+        return paymentBookings ?? [];
     }
 }
 

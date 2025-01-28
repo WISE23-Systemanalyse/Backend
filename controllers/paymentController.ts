@@ -36,7 +36,7 @@ export class PaymentController implements Controller<Payment> {
 
     const contextPayment: Payment = await value.json();
     try {
-      if (!contextPayment.amount || !contextPayment.tax) {
+      if (!contextPayment.amount || !contextPayment.tax || !contextPayment.payment_method || !contextPayment.payment_status || !contextPayment.payment_details) {
         ctx.response.status = 400;
         ctx.response.body = { message: "Missing required fields" };
       }
