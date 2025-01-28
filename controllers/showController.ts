@@ -51,6 +51,12 @@ export class ShowController implements Controller<Show> {
     }
   }
 
+  async getShowsByHallId(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    const shows = await showRepositoryObj.findByHallId(id);
+    ctx.response.body = shows;
+  }
+
   async create(ctx: Context): Promise<void> {
     const value = await ctx.request.body;
     const { movie_id, hall_id, start_time } = await value.json();
