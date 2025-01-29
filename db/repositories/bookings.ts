@@ -40,6 +40,10 @@ export class BookingRepository implements Repository<Booking> {
         const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
         return paymentBookings ?? [];
     }
+    async getBookingsByToken(token: Booking['token']): Promise<Booking[]> {
+        const tokenBookings = await db.select().from(bookings).where(eq(bookings["token"], token));
+        return tokenBookings ?? [];
+    }
 }
 
 export const bookingRepositoryObj = new BookingRepository();

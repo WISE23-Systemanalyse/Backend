@@ -26,6 +26,17 @@ export class BookingController implements Controller<Booking> {
     }
   }
 
+  async getByToken(ctx: Context): Promise<void> {
+    const { token } = ctx.params;
+    if (!token) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Token parameter is required" };
+      return;
+    }
+    const bookings = await bookingRepositoryObj.getBookingsByToken(token);
+    ctx.response.body = bookings;
+  }
+
   async create(ctx: Context): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
@@ -65,7 +76,7 @@ export class BookingController implements Controller<Booking> {
       const { id, show_id, user_id } = contextBooking;
       if (!id || !show_id || !user_id) {
         ctx.response.status = 400;
-        ctx.response.body = { message: "BookingId, showId and userId are required" };
+        ctx.response.body = { message: "BookingId, showId, userId and token are required" };
         return;
         }
     } catch (e) {

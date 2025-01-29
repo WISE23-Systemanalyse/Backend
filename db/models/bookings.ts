@@ -19,6 +19,7 @@ export const bookings = pgTable("bookings", {
   payment_id: integer("payment_id").notNull().references(() => payments.id, {
     onDelete: "cascade", 
   }),
+  token: varchar("token").notNull().unique(),
 });
 
 export type Booking = typeof bookings.$inferSelect;
