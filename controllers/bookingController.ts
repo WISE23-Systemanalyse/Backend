@@ -3,7 +3,6 @@ import { Controller } from "../interfaces/controller.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { Booking } from "../db/models/bookings.ts";
 
-
 export class BookingController implements Controller<Booking> {
   async getAll(ctx: Context): Promise<void> {
     const bookings = await bookingRepositoryObj.findAll();
@@ -117,7 +116,10 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = bookings;
     }
 
-
+    async getAllBookingDetails(ctx: Context): Promise<void> {
+        const bookingDetails = await bookingRepositoryObj.getAllBookingDetails;
+        ctx.response.body = bookingDetails;
+    }
 }
 
 export const bookingController = new BookingController();
