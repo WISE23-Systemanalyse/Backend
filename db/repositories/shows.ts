@@ -73,7 +73,7 @@ export class ShowRepository implements Repository<Show> {
         .returning();
     return updatedShow;
   }
-  async findByMovieId(movieId: Show["movie_id"]): Promise<{ show_id: number, hall_id: number, hall_name: string, start_time: Date }[]> {
+  async findByMovieId(movieId: Show["movie_id"]): Promise<{ show_id: number, hall_id: number, hall_name: string | null, start_time: Date }[]> {
     const result = await db
       .select({
         show_id: shows.id,
