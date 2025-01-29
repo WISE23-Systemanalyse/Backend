@@ -1,6 +1,6 @@
 {
-  "id": "098be420-31d0-4bc0-bc95-6356e35549aa",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "8db741e8-c79f-4d8b-bdc8-f04e35e77bea",
+  "prevId": "098be420-31d0-4bc0-bc95-6356e35549aa",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -135,7 +135,8 @@
           "name": "surcharge",
           "type": "double precision",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false,
+          "default": 0
         }
       },
       "indexes": {},
@@ -560,6 +561,12 @@
         "start_time": {
           "name": "start_time",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "base_price": {
+          "name": "base_price",
+          "type": "double precision",
           "primaryKey": false,
           "notNull": true
         }

@@ -9,5 +9,6 @@ import { paymentRoutes } from "./paymentRoutes.ts";
 import { seatRoutes } from "./seatRoutes.ts";
 import { newsletterRoutes } from "./newsletterRoutes.ts";
 import { contactRoutes } from "./contactRoutes.ts";
+import { categoryRoutes } from "./categoryRoutes.ts";
 
-export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes, seatRoutes, newsletterRoutes, contactRoutes };
+export {movieRoutes, bookingRoutes, statusRoutes, userRoutes, webhookRouter, showRoutes, hallRoutes, paymentRoutes, seatRoutes, newsletterRoutes, contactRoutes, categoryRoutes };

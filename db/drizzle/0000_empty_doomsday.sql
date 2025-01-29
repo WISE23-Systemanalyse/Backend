@@ -8,6 +8,13 @@ CREATE TABLE IF NOT EXISTS "bookings" (
 	CONSTRAINT "bookings_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "category" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"category_name" varchar(255) NOT NULL,
+	"surcharge" double precision NOT NULL,
+	CONSTRAINT "category_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "hall" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
@@ -58,7 +65,7 @@ CREATE TABLE IF NOT EXISTS "seat" (
 	"hall_id" integer NOT NULL,
 	"row_number" integer NOT NULL,
 	"seat_number" integer NOT NULL,
-	"seat_type" varchar(50),
+	"category_id" integer NOT NULL,
 	CONSTRAINT "seat_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
@@ -129,6 +136,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "seat" ADD CONSTRAINT "seat_hall_id_hall_id_fk" FOREIGN KEY ("hall_id") REFERENCES "public"."hall"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "seat" ADD CONSTRAINT "seat_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

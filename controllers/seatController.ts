@@ -35,10 +35,10 @@ export class SeatController implements Controller<Seat> {
     }
     const contextSeat: Seat = await value.json();
     try {
-      const { hall_id, row_number, seat_number } = contextSeat;
-      if (!hall_id || !row_number || !seat_number) {
+      const { hall_id, row_number, seat_number, category_id } = contextSeat;
+      if (!hall_id || !row_number || !seat_number || !category_id) {
         ctx.response.status = 400;
-        ctx.response.body = { message: "Row, number and hallId are required" };
+        ctx.response.body = { message: "Row, number, hallId and categoryId are required" };
         return;
       }
     } catch (e) {

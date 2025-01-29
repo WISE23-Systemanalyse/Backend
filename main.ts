@@ -16,7 +16,8 @@ import {
     paymentRoutes,
     seatRoutes,
     newsletterRoutes,
-    contactRoutes
+    contactRoutes,
+    categoryRoutes
 } from "./routes/index.ts";
 
 const app = new Application();
@@ -54,6 +55,9 @@ app.use(newsletterRoutes.allowedMethods());
 
 app.use(contactRoutes.routes());
 app.use(contactRoutes.allowedMethods());
+
+app.use(categoryRoutes.routes());
+app.use(categoryRoutes.allowedMethods());
 
 app.use(webhookRouter.routes());
 
