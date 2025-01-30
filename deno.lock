@@ -34,6 +34,7 @@
         "jsr:@std/media-types"
       ]
     },
+
     "@std/assert@1.0.10": {
       "integrity": "59b5cbac5bd55459a19045d95cc7c2ff787b4f8527c0dd195078ff6f9481fbb3",
       "dependencies": [
