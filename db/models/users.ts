@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, boolean, integer, numeric } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, boolean } from "drizzle-orm/pg-core";
 // import { relations } from "drizzle-orm/relations";
 
 
