@@ -59,9 +59,9 @@ export class ShowController implements Controller<Show> {
 
   async create(ctx: Context): Promise<void> {
     const value = await ctx.request.body;
-    const { movie_id, hall_id, start_time } = await value.json();
+    const { movie_id, hall_id, start_time, base_price } = await value.json();
 
-    if (!movie_id || !hall_id || !start_time) {
+    if (!movie_id || !hall_id || !start_time || !base_price) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Missing required fields" };
       return;
@@ -78,6 +78,7 @@ export class ShowController implements Controller<Show> {
       movie_id,
       hall_id,
       start_time: startTime,
+      base_price,
     };
 
     try {

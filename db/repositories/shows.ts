@@ -50,6 +50,27 @@ export class ShowRepository implements Repository<Show> {
     });
     return result ?? null;
   }
+  async findOneWithDetails(id: Show["id"]): Promise<ShowWithDetails | null> {
+    const result = await db
+        .select({
+            id: shows.id,
+            movie_id: shows.movie_id,
+            hall_id: shows.hall_id,
+            start_time: shows.start_time,
+            base_price: shows.base_price,
+            title: movies.title,
+            description: movies.description,
+            image_url: movies.imageUrl,
+            name: halls.name,
+        })
+        .from(shows)
+        .leftJoin(movies, eq(shows.movie_id, movies.id))
+        .leftJoin(halls, eq(shows.hall_id, halls.id))
+        .where(eq(shows.id, id));
+
+    const show = result[0];
+    return show ?? null;
+  }
   async delete(id: Show["id"]): Promise<void> {
     console.log("Delete called with id:", id);
     await db.delete(shows).where(eq(shows.id, id));

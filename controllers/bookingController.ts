@@ -120,6 +120,30 @@ export class BookingController implements Controller<Booking> {
         const bookingDetails = await bookingRepositoryObj.getAllBookingDetails;
         ctx.response.body = bookingDetails;
     }
+    async getByPaymentId(ctx: Context): Promise<void> {
+      const { paymentId } = ctx.params;
+      
+      if (!paymentId) {
+        ctx.response.status = 400;
+        ctx.response.body = { message: "Payment ID is required" };
+        return;
+      }
+
+      try {
+        const bookings = await bookingRepositoryObj.getBookingsByPaymentId(paymentId);
+        
+        if (bookings && bookings.length > 0) {
+          ctx.response.body = bookings;
+        } else {
+          ctx.response.status = 404;
+          ctx.response.body = { message: "No bookings found for this payment" };
+        }
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
+        ctx.response.status = 500;
+        ctx.response.body = { message: error.message };
+      }
+    }
 }
 
 export const bookingController = new BookingController();
