@@ -39,6 +39,10 @@ export class BookingRepository implements Repository<Booking> {
         const userBookings = await db.select().from(bookings).where(eq(bookings["user_id"], userId));
         return userBookings ?? [];
     }
+    async getBookingsByPaymentId(paymentId: Payment['id']): Promise<Booking[]> {
+        const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
+        return paymentBookings ?? [];
+    }
     async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, password: string | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, row_number: number | null, seat_number: number | null, seat_type: string | null, amount: number | null, payment_time: Date | null, tax: number | null }[]> {
         const booking = await db.select({
             // Booking Details

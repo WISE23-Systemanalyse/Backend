@@ -8,6 +8,7 @@ bookingRoutes
     .get("/bookings/details", bookingController.getAllBookingDetails)
     .get("/bookings", bookingController.getAll)
     .get("/bookings/:id", bookingController.getOne)
+    .get("/bookings/payment/:paymentId", bookingController.getByPaymentId)
     .post("/bookings", bookingController.create)
     .put("/bookings/:id", bookingController.update)
     .delete("/bookings:id", bookingController.delete);

@@ -1,7 +1,6 @@
 import { Application } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import { load } from "https://deno.land/std@0.204.0/dotenv/mod.ts";
-
 // Lade .env Datei BEVOR andere Imports
 await load({ export: true });
 
@@ -9,14 +8,14 @@ import {
     statusRoutes,
     userRoutes,
     movieRoutes,
-    webhookRouter,
+    categoryRoutes,
     showRoutes,
     bookingRoutes,
     hallRoutes,
     paymentRoutes,
     seatRoutes,
     newsletterRoutes,
-    contactRoutes
+    contactRoutes,
 } from "./routes/index.ts";
 
 const app = new Application();
@@ -55,7 +54,8 @@ app.use(newsletterRoutes.allowedMethods());
 app.use(contactRoutes.routes());
 app.use(contactRoutes.allowedMethods());
 
-app.use(webhookRouter.routes());
+app.use(categoryRoutes.routes());
+app.use(categoryRoutes.allowedMethods());
 
 // Start the server
 console.log("Server läuft auf http://localhost:8000");

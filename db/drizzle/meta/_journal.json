@@ -29,6 +29,20 @@
       "when": 1737646097283,
       "tag": "0003_crazy_fantastic_four",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1738253945929,
+      "tag": "0004_odd_khan",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1738256000192,
+      "tag": "0005_wise_major_mapleleaf",
+      "breakpoints": true
     }
   ]
 }
