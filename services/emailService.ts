@@ -41,11 +41,8 @@ export class EmailService {
       }
     });
   }
-    private readonly username = "cinemaplus1995@gmail.com";
-    private readonly password = "kbfz hgcn kqyq psbu";
-
     private async createClient(): Promise<SMTPClient> {
-        return new SMTPClient({
+        return await new SMTPClient({
             connection: {
                 hostname: "smtp.gmail.com",
                 port: 465,
@@ -57,7 +54,6 @@ export class EmailService {
             }
         });
     }
-  }
 
     async sendNewsletterConfirmation(email: string): Promise<void> {
         let client: SMTPClient | null = null;
@@ -87,8 +83,6 @@ export class EmailService {
             }
         }
     }
-  }
-
   async sendVerificationMail(email: string): Promise<string> {
     const verificationCode = generateVerificationCode();
 
@@ -111,7 +105,8 @@ export class EmailService {
     } catch (error) {
       console.error("Fehler beim Senden der Verifikations-Email:", error);
       throw error;
-
+    }
+  }
     async sendContactFormMail(data: ContactForm): Promise<void> {
         let client: SMTPClient | null = null;
         try {
@@ -141,6 +136,5 @@ export class EmailService {
         }
     }
   }
-}
 
 export const emailServiceObj = new EmailService();
