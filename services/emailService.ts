@@ -46,7 +46,6 @@ export class EmailService {
                 subject: "Newsletter Anmeldung",
                 html: getNewsletterTemplate(email),
             });
-            console.log("Newsletter-E-Mail gesendet an:", email);
         } catch (error) {
             console.error("Fehler beim Senden der E-Mail:", error);
             throw error;
@@ -61,7 +60,6 @@ export class EmailService {
                 subject: `Kontaktanfrage: ${data.subject}`,
                 html: getContactMailTemplate(data),
             });
-            console.log("Kontaktformular-E-Mail gesendet an:", data.email);
         } catch (error) {
             console.error("Fehler beim Senden der Kontaktformular-E-Mail:", error);
             throw error;

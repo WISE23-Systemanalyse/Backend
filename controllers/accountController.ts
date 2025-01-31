@@ -106,13 +106,12 @@ export class AccountController {
 
     try {
       const payload = await verify(jwt, Deno.env.get("JWT_SECRET_KEY")!, "HS256");
-      console.log(payload);
       if (!payload) {
         ctx.response.status = 401;
         ctx.response.body = { message: "unauthenticated" };
         return;
       }
-
+      
       const user = await userRepositoryObj.find(payload.id);
       if (user) {
         ctx.response.status = 200;
