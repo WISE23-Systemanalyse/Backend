@@ -18,7 +18,7 @@ function getNewsletterTemplate(email: string) {
 export class EmailService {
     private client: SMTPClient;
     private readonly username = "cinemaplus1995@gmail.com";
-    private readonly password = "tebv xsag uwuh rjkx";
+    private readonly password = "kbfz hgcn kqyq psbu";
 
     constructor() {
         this.client = new SMTPClient({
