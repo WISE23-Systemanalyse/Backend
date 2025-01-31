@@ -36,7 +36,12 @@ export class NewsletterController {
             ctx.response.body = { message: "Bestätigungs-E-Mail wurde gesendet" };
 
         } catch (error) {
-            console.error("Newsletter Subscription Error:", error);
+            console.error("Newsletter Subscription Error Details:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+                name: error instanceof Error ? error.name : "UnknownError"
+            });
             ctx.response.status = 500;
             ctx.response.body = { 
                 message: "Ein Fehler ist aufgetreten",
