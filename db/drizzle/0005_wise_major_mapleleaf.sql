@@ -1,1 +1,0 @@
-ALTER TABLE "show" ADD COLUMN "base_price" double precision NOT NULL;

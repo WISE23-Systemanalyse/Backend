@@ -5,8 +5,16 @@ CREATE TABLE IF NOT EXISTS "bookings" (
 	"seat_id" integer NOT NULL,
 	"booking_time" timestamp DEFAULT now(),
 	"payment_id" integer NOT NULL,
+	"token" varchar NOT NULL,
 	CONSTRAINT "bookings_id_unique" UNIQUE("id"),
-	CONSTRAINT "bookings_payment_id_unique" UNIQUE("payment_id")
+	CONSTRAINT "bookings_token_unique" UNIQUE("token")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "category" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"category_name" varchar(255) NOT NULL,
+	"surcharge" double precision DEFAULT 0,
+	CONSTRAINT "category_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "hall" (
@@ -35,7 +43,23 @@ CREATE TABLE IF NOT EXISTS "payments" (
 	"amount" double precision NOT NULL,
 	"payment_time" timestamp DEFAULT now(),
 	"tax" double precision NOT NULL,
+	"payment_method" varchar(255) NOT NULL,
+	"payment_status" varchar(255) NOT NULL,
+	"payment_details" varchar(255) NOT NULL,
+	"time_of_payment" timestamp DEFAULT now(),
 	CONSTRAINT "payments_id_unique" UNIQUE("id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "reservation" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"seat_id" integer NOT NULL,
+	"show_id" integer NOT NULL,
+	"user_id" varchar,
+	"guest_email" varchar(255),
+	"guest_name" varchar(255),
+	"expire_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "reservation_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "seat" (
@@ -43,7 +67,7 @@ CREATE TABLE IF NOT EXISTS "seat" (
 	"hall_id" integer NOT NULL,
 	"row_number" integer NOT NULL,
 	"seat_number" integer NOT NULL,
-	"seat_type" varchar(50),
+	"category_id" integer NOT NULL,
 	CONSTRAINT "seat_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
@@ -52,6 +76,7 @@ CREATE TABLE IF NOT EXISTS "show" (
 	"movie_id" integer NOT NULL,
 	"hall_id" integer NOT NULL,
 	"start_time" timestamp NOT NULL,
+	"base_price" double precision NOT NULL,
 	CONSTRAINT "show_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
@@ -65,9 +90,19 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"image_url" varchar,
 	"created_at" timestamp DEFAULT now(),
 	"updated_at" timestamp DEFAULT now(),
-	"is_admin" boolean,
+	"is_admin" boolean DEFAULT false,
+	"is_verified" boolean DEFAULT false,
 	CONSTRAINT "users_id_unique" UNIQUE("id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "verification_codes" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"code" varchar(6) NOT NULL,
+	"created_at" timestamp DEFAULT now(),
+	"expires_at" timestamp NOT NULL,
+	"is_used" boolean DEFAULT false
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -95,7 +130,31 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
+ ALTER TABLE "reservation" ADD CONSTRAINT "reservation_seat_id_seat_id_fk" FOREIGN KEY ("seat_id") REFERENCES "public"."seat"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "reservation" ADD CONSTRAINT "reservation_show_id_show_id_fk" FOREIGN KEY ("show_id") REFERENCES "public"."show"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "reservation" ADD CONSTRAINT "reservation_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
  ALTER TABLE "seat" ADD CONSTRAINT "seat_hall_id_hall_id_fk" FOREIGN KEY ("hall_id") REFERENCES "public"."hall"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "seat" ADD CONSTRAINT "seat_category_id_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."category"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
