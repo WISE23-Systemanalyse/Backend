@@ -1,1 +1,0 @@
-ALTER TABLE "bookings" DROP CONSTRAINT "bookings_payment_id_unique";
