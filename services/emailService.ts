@@ -16,12 +16,11 @@ function getNewsletterTemplate(email: string) {
 }
 
 export class EmailService {
-    private client: SMTPClient;
     private readonly username = "cinemaplus1995@gmail.com";
     private readonly password = "kbfz hgcn kqyq psbu";
 
-    constructor() {
-        this.client = new SMTPClient({
+    private async createClient(): Promise<SMTPClient> {
+        return new SMTPClient({
             connection: {
                 hostname: "smtp.gmail.com",
                 port: 465,
@@ -35,8 +34,10 @@ export class EmailService {
     }
 
     async sendNewsletterConfirmation(email: string): Promise<void> {
+        let client: SMTPClient | null = null;
         try {
-            await this.client.send({
+            client = await this.createClient();
+            await client.send({
                 from: this.username,
                 to: email,
                 subject: "Newsletter Anmeldung",
@@ -44,14 +45,28 @@ export class EmailService {
             });
             console.log("Newsletter-E-Mail gesendet an:", email);
         } catch (error) {
-            console.error("Fehler beim Senden der E-Mail:", error);
+            console.error("Fehler beim Senden der Newsletter-E-Mail:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+            });
             throw error;
+        } finally {
+            if (client) {
+                try {
+                    await client.close();
+                } catch (closeError) {
+                    console.error("Fehler beim Schließen der SMTP-Verbindung:", closeError);
+                }
+            }
         }
     }
 
     async sendContactFormMail(data: ContactForm): Promise<void> {
+        let client: SMTPClient | null = null;
         try {
-            await this.client.send({
+            client = await this.createClient();
+            await client.send({
                 from: this.username,
                 to: data.email,
                 subject: `Kontaktanfrage: ${data.subject}`,
@@ -59,8 +74,20 @@ export class EmailService {
             });
             console.log("Kontaktformular-E-Mail gesendet an:", data.email);
         } catch (error) {
-            console.error("Fehler beim Senden der Kontaktformular-E-Mail:", error);
+            console.error("Fehler beim Senden der Kontaktformular-E-Mail:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+            });
             throw error;
+        } finally {
+            if (client) {
+                try {
+                    await client.close();
+                } catch (closeError) {
+                    console.error("Fehler beim Schließen der SMTP-Verbindung:", closeError);
+                }
+            }
         }
     }
 }
