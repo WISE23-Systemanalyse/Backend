@@ -61,7 +61,12 @@ export class ContactController {
             ctx.response.body = { message: "Kontaktanfrage erfolgreich gesendet" };
 
         } catch (error) {
-            console.error("Contact Form Submission Error:", error);
+            console.error("Contact Form Submission Error Details:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+                name: error instanceof Error ? error.name : "UnknownError"
+            });
             ctx.response.status = 500;
             ctx.response.body = { 
                 message: "Fehler beim Senden der Kontaktanfrage",
