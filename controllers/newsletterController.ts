@@ -24,7 +24,7 @@ export class NewsletterController {
             }
 
             // E-Mail-Validierung
-            if (!email || !this.isValidEmail(email)) {
+            if (!email || !NewsletterController.isValidEmail(email)) {
                 ctx.response.status = 400;
                 ctx.response.body = { message: "Ungültige E-Mail-Adresse" };
                 return;
@@ -50,7 +50,7 @@ export class NewsletterController {
         }
     }
 
-    private isValidEmail(email: string): boolean {
+    private static isValidEmail(email: string): boolean {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
