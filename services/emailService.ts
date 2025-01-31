@@ -41,32 +41,51 @@ export class EmailService {
       }
     });
   }
+    private readonly username = "cinemaplus1995@gmail.com";
+    private readonly password = "kbfz hgcn kqyq psbu";
 
-  async sendNewsletterConfirmation(email: string): Promise<void> {
-    try {
-      await this.client.send({
-        from: this.username,
-        to: email,
-        subject: "Newsletter Anmeldung",
-        html: getNewsletterTemplate(email),
-      });
-    } catch (error) {
-      console.error("Fehler beim Senden der E-Mail:", error);
-      throw error;
+    private async createClient(): Promise<SMTPClient> {
+        return new SMTPClient({
+            connection: {
+                hostname: "smtp.gmail.com",
+                port: 465,
+                tls: true,
+                auth: {
+                    username: this.username,
+                    password: this.password,
+                }
+            }
+        });
     }
   }
 
-  async sendContactFormMail(data: ContactForm): Promise<void> {
-    try {
-      await this.client.send({
-        from: this.username,
-        to: data.email,
-        subject: `Kontaktanfrage: ${data.subject}`,
-        html: getContactMailTemplate(data),
-      });
-    } catch (error) {
-      console.error("Fehler beim Senden der Kontaktformular-E-Mail:", error);
-      throw error;
+    async sendNewsletterConfirmation(email: string): Promise<void> {
+        let client: SMTPClient | null = null;
+        try {
+            client = await this.createClient();
+            await client.send({
+                from: this.username,
+                to: email,
+                subject: "Newsletter Anmeldung",
+                html: getNewsletterTemplate(email),
+            });
+            console.log("Newsletter-E-Mail gesendet an:", email);
+        } catch (error) {
+            console.error("Fehler beim Senden der Newsletter-E-Mail:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+            });
+            throw error;
+        } finally {
+            if (client) {
+                try {
+                    await client.close();
+                } catch (closeError) {
+                    console.error("Fehler beim Schließen der SMTP-Verbindung:", closeError);
+                }
+            }
+        }
     }
   }
 
@@ -92,6 +111,34 @@ export class EmailService {
     } catch (error) {
       console.error("Fehler beim Senden der Verifikations-Email:", error);
       throw error;
+
+    async sendContactFormMail(data: ContactForm): Promise<void> {
+        let client: SMTPClient | null = null;
+        try {
+            client = await this.createClient();
+            await client.send({
+                from: this.username,
+                to: data.email,
+                subject: `Kontaktanfrage: ${data.subject}`,
+                html: getContactMailTemplate(data),
+            });
+            console.log("Kontaktformular-E-Mail gesendet an:", data.email);
+        } catch (error) {
+            console.error("Fehler beim Senden der Kontaktformular-E-Mail:", {
+                error: error,
+                stack: error instanceof Error ? error.stack : undefined,
+                message: error instanceof Error ? error.message : "Unbekannter Fehler",
+            });
+            throw error;
+        } finally {
+            if (client) {
+                try {
+                    await client.close();
+                } catch (closeError) {
+                    console.error("Fehler beim Schließen der SMTP-Verbindung:", closeError);
+                }
+            }
+        }
     }
   }
 }
