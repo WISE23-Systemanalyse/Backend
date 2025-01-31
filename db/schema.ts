@@ -6,6 +6,7 @@ import * as showsSchema from "./models/shows.ts";
 import * as bookingsSchema from "./models/bookings.ts";
 import * as paymentsSchema from "./models/payments.ts";
 import * as reservationsSchema from "./models/reservations.ts";
+import * as VerificationCodeSchema from "./models/verificationCodes.ts";
 import * as categorySchema from "./models/categories.ts";
 
 export const schema = {
@@ -18,4 +19,5 @@ export const schema = {
   ...paymentsSchema,
   ...categorySchema,
   ...reservationsSchema,
+  ...VerificationCodeSchema
 };

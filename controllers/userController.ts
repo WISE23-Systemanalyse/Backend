@@ -1,11 +1,11 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { userRepository } from "../db/repositories/users.ts";
+import { userRepositoryObj } from "../db/repositories/users.ts";
 import { User } from "../db/models/users.ts";
 
 export class UserController implements Controller<User> {
   async getAll(ctx: Context): Promise<void> {
-    const users = await userRepository.findAll();
+    const users = await userRepositoryObj.findAll();
     ctx.response.body = users;
   }
 
@@ -16,7 +16,7 @@ export class UserController implements Controller<User> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const user = await userRepository.find(id);
+    const user = await userRepositoryObj.find(id);
     if (user) {
       ctx.response.body = user;
     } else {
@@ -45,7 +45,7 @@ export class UserController implements Controller<User> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const user = await userRepository.create( contextUser );
+    const user = await userRepositoryObj.create( contextUser );
     ctx.response.status = 201;
     ctx.response.body = user;
   }
@@ -64,9 +64,9 @@ export class UserController implements Controller<User> {
       return;
     }
     const ContextUser:User = await value.json();
-    const user = await userRepository.find(id);
+    const user = await userRepositoryObj.find(id);
     if (user) {
-      const updatedUser = await userRepository.update(id, ContextUser);
+      const updatedUser = await userRepositoryObj.update(id, ContextUser);
       ctx.response.status = 200;
       ctx.response.body = updatedUser;
     } else {
@@ -82,9 +82,9 @@ export class UserController implements Controller<User> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const user = await userRepository.find(id);
+    const user = await userRepositoryObj.find(id);
     if (user) {
-      await userRepository.delete(id);
+      await userRepositoryObj.delete(id);
       ctx.response.status = 204;
     } else {
       ctx.response.status = 404;

@@ -1,4 +1,4 @@
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { showRepositoryObj } from "../db/repositories/shows.ts";
 import { Show } from "../db/models/shows.ts";
@@ -8,7 +8,6 @@ import { reservationServiceObj } from "../services/reservationService.ts";
 
 export class ShowController implements Controller<Show> {
   async getAll(ctx: Context): Promise<void> {
-    console.log("Get all shows called");
     const shows = await showRepositoryObj.findAll();
     ctx.response.body = shows;
   }
@@ -25,7 +24,6 @@ export class ShowController implements Controller<Show> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    console.log("Controller getOne called");
     const show = await showRepositoryObj.find(id);
     if (show) {
       ctx.response.body = show;
@@ -120,7 +118,6 @@ export class ShowController implements Controller<Show> {
   }
 
   async delete(ctx: Context): Promise<void> {
-    console.log("Delete called");
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;

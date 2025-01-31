@@ -1,4 +1,4 @@
-import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.4/mod.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { categoryRepositoryObj } from "../db/repositories/categories.ts";
 import { Category } from "../db/models/categories.ts";

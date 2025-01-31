@@ -1,4 +1,4 @@
-import { pgTable, varchar, timestamp, boolean, integer, numeric } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
 // import { relations } from "drizzle-orm/relations";
 
 
@@ -12,7 +12,8 @@ export const users = pgTable("users", {
   imageUrl: varchar("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-  isAdmin: boolean("is_admin"),
+  isAdmin: boolean("is_admin").default(false),
+  isVerified: boolean("is_verified").default(false)
 });
 
 
