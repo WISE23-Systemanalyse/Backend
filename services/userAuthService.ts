@@ -1,10 +1,10 @@
 import { db } from "../db/db.ts";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { verificationCodes } from "../db/models/verificationCodes.ts";
 import { users } from "../db/models/users.ts";
 import { userRepositoryObj } from "../db/repositories/users.ts";
 import { create } from "https://deno.land/x/djwt@v2.2/mod.ts";
-import { InvalidPassword, InvalidVerificationCode, UserAllreadyExists, UserNotFound, UserNotVerified } from "../Errors/UserErrors.ts";
+import { InvalidPassword, InvalidVerificationCode, UserAllreadyExists, UserNotFound, UserNotVerified, UserNameAlreadyExists } from "../Errors/UserErrors.ts";
 import { emailServiceObj } from "./emailService.ts";
 
 const EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
@@ -80,17 +80,53 @@ export class UserAuthService {
   async register(user: any): Promise<void> {
     try {
       await db.transaction(async (tx) => {
-        const isUserExist = await tx.query.users.findFirst({
-          where: eq(users.email, user.email),
+        // Check if email exists
+        const existingUser = await tx.query.users.findFirst({
+          where: eq(users.email, user.email)
         });
-        if (isUserExist) {
+
+        if (existingUser?.isVerified) {
           throw new UserAllreadyExists();
         }
-        const [createdUser] = await tx.insert(users).values(user).returning();
+
+        // Check if username exists
+        const existingUsername = await tx.query.users.findFirst({
+          where: eq(users.userName, user.userName)
+        });
+
+        if (existingUsername) {
+          throw new UserNameAlreadyExists();
+        }
+
+        // Create new user if doesn't exist
+        if (!existingUser) {
+          await tx.insert(users).values(user);
+        }
+
+        // Generate and send verification code
+        const verificationCode = await emailServiceObj.sendVerificationMail(user.email);
         const now = new Date();
         const expireAt = new Date(now.getTime() + EXPIRETIME);
-        try {
-          const verificationCode = await emailServiceObj.sendVerificationMail(user.email);
+  
+        // Find existing verification code
+        const existingCode = await tx.query.verificationCodes.findFirst({
+          where: and(
+            eq(verificationCodes.email, user.email),
+            eq(verificationCodes.isUsed, false)
+          )
+        });
+  
+        if (existingCode) {
+          // Update existing code
+          await tx
+            .update(verificationCodes)
+            .set({
+              code: verificationCode,
+              expiresAt: expireAt
+            })
+            .where(eq(verificationCodes.id, existingCode.id));
+        } else {
+          // Create new verification code
           await tx.insert(verificationCodes).values({
             id: crypto.randomUUID(),
             email: user.email,
@@ -98,13 +134,10 @@ export class UserAuthService {
             expiresAt: expireAt,
             isUsed: false,
           });
-        } catch (error) {
-          throw error;
         }
-        
-      });      
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }

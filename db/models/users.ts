@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  userName: varchar("user_name"),
+  userName: varchar("user_name").unique(),
   imageUrl: varchar("image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

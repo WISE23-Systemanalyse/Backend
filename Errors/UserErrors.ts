@@ -35,3 +35,10 @@ export class UserNotVerified extends ApiError {
     Object.setPrototypeOf(this, ApiError.prototype);
   }
 }
+
+export class UserNameAlreadyExists extends Error {
+  constructor() {
+    super("Username already exists");
+    this.name = "UserNameAlreadyExists";
+  }
+}
