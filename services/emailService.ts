@@ -97,7 +97,7 @@ export class EmailService {
               <h2 style="font-size: 24px; letter-spacing: 5px; background: #f4f4f4; padding: 10px; text-align: center;">
                 ${verificationCode}
               </h2>
-              <p>Der Code ist 10 Minuten gültig.</p>
+              <p>Der Code ist 24 Stunden gültig.</p>
             `,
       });
 
