@@ -1,7 +1,5 @@
 import { ReservationRepositoryObj } from "../db/repositories/reservations.ts";
-import {Create} from "../interfaces/repository.ts"
-import { Reservation } from "../db/models/reservations.ts";
-import { InternalServerError, ReservationNotFound, ApiError  } from "../Errors/index.ts";
+import { ReservationNotFound  } from "../Errors/index.ts";
 
 
 export class ReservationService {
