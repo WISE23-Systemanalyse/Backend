@@ -15,6 +15,13 @@
       "when": 1738437510666,
       "tag": "0001_windy_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738694558693,
+      "tag": "0002_condemned_enchantress",
+      "breakpoints": true
     }
   ]
 }

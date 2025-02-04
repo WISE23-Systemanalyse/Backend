@@ -8,7 +8,7 @@ import { InvalidPassword, InvalidVerificationCode, UserAllreadyExists, UserNotFo
 import { emailServiceObj } from "./emailService.ts";
 import * as bycript from "https://deno.land/x/bcrypt/mod.ts";
 
-const EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
+const VERIFICATIONCODE_EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
 
 export class UserAuthService {
   async verifyUser(email: string, code: string): Promise<void> {
@@ -24,21 +24,19 @@ export class UserAuthService {
       // Validate verification code
       if (!verificationCode || 
           verificationCode.code !== code ||
-          verificationCode.isUsed ||
           new Date() > verificationCode.expiresAt) {
         throw new InvalidVerificationCode();
       }
 
-      // Update verification status
+      // Update User verification status
       await tx
         .update(users)
         .set({ isVerified: true })
         .where(eq(users.email, email));
 
-      // Mark verification code as used
+      // Delete verification code after use
       await tx
-        .update(verificationCodes)
-        .set({ isUsed: true })
+        .delete(verificationCodes)
         .where(eq(verificationCodes.id, verificationCode.id));
     });
   }
@@ -108,13 +106,12 @@ export class UserAuthService {
         }
 
         const now = new Date();
-        const expireAt = new Date(now.getTime() + EXPIRETIME);
+        const expireAt = new Date(now.getTime() + VERIFICATIONCODE_EXPIRETIME);
   
         // Find existing verification code
         const existingCode = await tx.query.verificationCodes.findFirst({
           where: and(
-            eq(verificationCodes.email, user.email),
-            eq(verificationCodes.isUsed, false)
+            eq(verificationCodes.email, user.email)
           )
         });
   
@@ -135,7 +132,6 @@ export class UserAuthService {
             email: user.email,
             code: verificationCode,
             expiresAt: expireAt,
-            isUsed: false,
           });
         }
       });
