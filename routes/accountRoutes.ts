@@ -8,7 +8,6 @@ accountRoutes
     .post("/signup", accountController.signup)
     .post("/verifyemail", accountController.verifyEmail)
     .post("/signin", accountController.signin)
-    .get("/me", accountController.me);
 
 
 
