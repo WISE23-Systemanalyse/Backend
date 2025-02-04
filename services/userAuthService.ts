@@ -49,7 +49,8 @@ export class UserAuthService {
       if (!user) {
         throw new UserNotFound();
       }
-      if (!await bycript.compare(user.password!, password)) {
+
+      if (!await bycript.compare(password, user.password!)) {
         throw new InvalidPassword();
       }
       if(!user.isVerified) {
@@ -70,7 +71,7 @@ export class UserAuthService {
       );
       const { password: _password, isAdmin: _isAdmin, ...custonUser } = user;
       return {
-        ...custonUser,
+        user: custonUser,
         token
       }
     } catch (error) {

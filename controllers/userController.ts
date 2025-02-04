@@ -2,6 +2,7 @@ import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { userRepositoryObj } from "../db/repositories/users.ts";
 import { User } from "../db/models/users.ts";
+import { verify } from "https://deno.land/x/djwt@v2.2/mod.ts";
 
 export class UserController implements Controller<User> {
   async getAll(ctx: Context): Promise<void> {
@@ -50,7 +51,35 @@ export class UserController implements Controller<User> {
     ctx.response.body = user;
   }
 
-  async update(ctx: RouterContext<"/users/:id">): Promise<void> {
+  async update(ctx: RouterContext<"/users">): Promise<void> {
+    const authHeader = ctx.request.headers.get("Authorization");
+    const jwt = authHeader?.split(" ")[1]; // Extract token from "Bearer <token>"
+    if (!jwt) {
+      ctx.response.status = 401;
+      ctx.response.body = { message: "unauthenticated" };
+      return;
+    }
+
+    try {
+      const payload = await verify(jwt, Deno.env.get("JWT_SECRET_KEY")!, "HS256");
+      if (!payload || !payload.id) {
+        ctx.response.status = 401;
+        ctx.response.body = { message: "unauthenticated" };
+        return;
+      }
+      const user = await userRepositoryObj.find(payload.id.toString());
+      if (user) {
+        ctx.response.status = 200;
+        ctx.response.body = { message: user };
+      } else {
+        ctx.response.status = 404;
+        ctx.response.body = { message: "User not found." };
+      }
+    } catch (error) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Invalid or expired token." };
+    }
+
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
