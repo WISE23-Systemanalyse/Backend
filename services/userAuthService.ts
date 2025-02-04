@@ -6,6 +6,7 @@ import { userRepositoryObj } from "../db/repositories/users.ts";
 import { create } from "https://deno.land/x/djwt@v2.2/mod.ts";
 import { InvalidPassword, InvalidVerificationCode, UserAllreadyExists, UserNotFound, UserNotVerified, UserNameAlreadyExists } from "../Errors/UserErrors.ts";
 import { emailServiceObj } from "./emailService.ts";
+import * as bycript from "https://deno.land/x/bcrypt/mod.ts";
 
 const EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
 
@@ -48,7 +49,8 @@ export class UserAuthService {
       if (!user) {
         throw new UserNotFound();
       }
-      if (user.password !== password) {
+
+      if (!await bycript.compare(password, user.password!)) {
         throw new InvalidPassword();
       }
       if(!user.isVerified) {
@@ -69,7 +71,7 @@ export class UserAuthService {
       );
       const { password: _password, isAdmin: _isAdmin, ...custonUser } = user;
       return {
-        ...custonUser,
+        user: custonUser,
         token
       }
     } catch (error) {
@@ -79,32 +81,32 @@ export class UserAuthService {
 
   async register(user: any): Promise<void> {
     try {
+      let verificationCode: string | null = null;
+      
       await db.transaction(async (tx) => {
-        // Check if email exists
+        // Check if email exists and is verified
         const existingUser = await tx.query.users.findFirst({
           where: eq(users.email, user.email)
         });
-
+  
         if (existingUser?.isVerified) {
           throw new UserAllreadyExists();
         }
-
+  
         // Check if username exists
         const existingUsername = await tx.query.users.findFirst({
           where: eq(users.userName, user.userName)
         });
-
+  
         if (existingUsername) {
           throw new UserNameAlreadyExists();
         }
-
+  
         // Create new user if doesn't exist
         if (!existingUser) {
           await tx.insert(users).values(user);
         }
 
-        // Generate and send verification code
-        const verificationCode = await emailServiceObj.sendVerificationMail(user.email);
         const now = new Date();
         const expireAt = new Date(now.getTime() + EXPIRETIME);
   
@@ -116,8 +118,9 @@ export class UserAuthService {
           )
         });
   
+        verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
         if (existingCode) {
-          // Update existing code
           await tx
             .update(verificationCodes)
             .set({
@@ -136,6 +139,11 @@ export class UserAuthService {
           });
         }
       });
+
+      if (verificationCode) {
+        await emailServiceObj.sendVerificationMail(user.email, verificationCode);
+      }
+  
     } catch (error) {
       throw error;
     }

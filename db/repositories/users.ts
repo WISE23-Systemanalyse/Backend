@@ -23,7 +23,10 @@ export class UserRepository implements Repository<User> {
     }
     async create(value: Create<User>): Promise<User> {
       try {
-        const [user] = await db.insert(users).values(value).returning();
+        const [user] = await db.insert(users).values({
+          ...value,
+          id: crypto.randomUUID(),
+        }).returning();
         return user;
       } catch (error) {
         throw error;

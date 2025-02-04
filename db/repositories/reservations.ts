@@ -117,7 +117,7 @@ export class ReservationRepository implements Repository<Reservation> {
 
         // Create new reservation if no expired one exists
         try {
-          const [newReservation] = await db.insert(reservations)
+          const [newReservation] = await tx.insert(reservations)
           .values(
             {
               ...value,

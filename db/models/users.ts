@@ -3,7 +3,7 @@ import { pgTable, varchar, timestamp, boolean, uuid } from "drizzle-orm/pg-core"
 
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().unique().notNull(),
+  id: uuid("id").primaryKey().unique(),
   password: varchar("password"),
   email: varchar("email").notNull().unique(),
   firstName: varchar("first_name"),
