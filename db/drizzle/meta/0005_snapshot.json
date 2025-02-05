@@ -1,6 +1,6 @@
 {
-  "id": "eaed085a-ca6a-45c2-b35f-355d9649d780",
-  "prevId": "0dcd8c76-5f9f-4c9b-a7f2-7b38bace2d56",
+  "id": "691b1df4-ca8a-4fa5-9f75-27ed96c0d5b1",
+  "prevId": "9bdbceaa-45ba-4bf6-a8ea-ebf377de57ac",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -18,7 +18,13 @@
           "name": "user_id",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "show_id": {
           "name": "show_id",
@@ -331,12 +337,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "payment_details": {
-          "name": "payment_details",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": false
-        },
         "time_of_payment": {
           "name": "time_of_payment",
           "type": "timestamp",
@@ -633,7 +633,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar",
+          "type": "uuid",
           "primaryKey": true,
           "notNull": true
         },

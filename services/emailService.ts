@@ -16,23 +16,9 @@ function getNewsletterTemplate(email: string) {
 }
 
 export class EmailService {
-  private client: SMTPClient;
-  private readonly username = "cinemaplus1995@gmail.com";
-  private readonly password = "tebv xsag uwuh rjkx";
+    private readonly username = "cinemaplus1995@gmail.com";
+    private readonly password = "tebv xsag uwuh rjkx";
 
-  constructor() {
-    this.client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: this.username,
-          password: this.password,
-        }
-      }
-    });
-  }
     private async createClient(): Promise<SMTPClient> {
         return await new SMTPClient({
             connection: {
@@ -76,8 +62,10 @@ export class EmailService {
         }
     }
   async sendVerificationMail(email: string, verificationCode: string): Promise<string> {
+    let client: SMTPClient | null = null;
     try {
-      await this.client.send({
+      client = await this.createClient();
+      await client.send({
         from: this.username,
         to: email,
         subject: "Email Verifizierung",
@@ -94,7 +82,15 @@ export class EmailService {
     } catch (error) {
       console.error("Fehler beim Senden der Verifikations-Email:", error);
       throw error;
-    }
+    }finally {
+      if (client) {
+          try {
+              await client.close();
+          } catch (closeError) {
+              console.error("Fehler beim Schließen der SMTP-Verbindung:", closeError);
+          }
+      }
+  }
   }
     async sendContactFormMail(data: ContactForm): Promise<void> {
         let client: SMTPClient | null = null;

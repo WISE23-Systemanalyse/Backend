@@ -5,6 +5,6 @@ import { seatRepositoryObj } from "./seats.ts";
 import { hallRepository } from "./halls.ts";
 import { userRepositoryObj } from "./users.ts";
 import { hallController } from "../../controllers/hallController.ts";
-import { paymentRepository } from "./payments.ts";
+import { paymentRepositoryObj } from "./payments.ts";
 
-export { bookingRepositoryObj, movieRepository, showRepositoryObj, seatRepositoryObj, hallRepository, userRepositoryObj, hallController, paymentRepository};
+export { bookingRepositoryObj, movieRepository, showRepositoryObj, seatRepositoryObj, hallRepository, userRepositoryObj, hallController, paymentRepositoryObj};

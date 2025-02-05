@@ -34,7 +34,7 @@ export class UserAuthService {
         .set({ isVerified: true })
         .where(eq(users.email, email));
 
-      // Delete verification code after use
+      // delete used verification code
       await tx
         .delete(verificationCodes)
         .where(eq(verificationCodes.id, verificationCode.id));
@@ -111,7 +111,7 @@ export class UserAuthService {
         // Find existing verification code
         const existingCode = await tx.query.verificationCodes.findFirst({
           where: and(
-            eq(verificationCodes.email, user.email)
+            eq(verificationCodes.email, user.email),
           )
         });
   

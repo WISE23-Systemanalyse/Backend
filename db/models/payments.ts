@@ -7,7 +7,6 @@ export const payments = pgTable("payments", {
     tax: doublePrecision("tax").notNull(),
     payment_method: varchar("payment_method", { length: 255 }).notNull(),
     payment_status: varchar("payment_status", { length: 255 }).notNull(),
-    payment_details: varchar("payment_details", { length: 255 }).notNull(),
     time_of_payment: timestamp("time_of_payment").defaultNow(),
 });
 
