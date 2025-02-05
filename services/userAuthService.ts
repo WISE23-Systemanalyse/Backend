@@ -24,7 +24,6 @@ export class UserAuthService {
       // Validate verification code
       if (!verificationCode || 
           verificationCode.code !== code ||
-          verificationCode.isUsed ||
           new Date() > verificationCode.expiresAt) {
         throw new InvalidVerificationCode();
       }
@@ -35,10 +34,9 @@ export class UserAuthService {
         .set({ isVerified: true })
         .where(eq(users.email, email));
 
-      // Mark verification code as used
+      // delete used verification code
       await tx
-        .update(verificationCodes)
-        .set({ isUsed: true })
+        .delete(verificationCodes)
         .where(eq(verificationCodes.id, verificationCode.id));
     });
   }
@@ -114,7 +112,6 @@ export class UserAuthService {
         const existingCode = await tx.query.verificationCodes.findFirst({
           where: and(
             eq(verificationCodes.email, user.email),
-            eq(verificationCodes.isUsed, false)
           )
         });
   
@@ -135,7 +132,6 @@ export class UserAuthService {
             email: user.email,
             code: verificationCode,
             expiresAt: expireAt,
-            isUsed: false,
           });
         }
       });
