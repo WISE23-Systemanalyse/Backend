@@ -11,6 +11,7 @@ import { contactRoutes } from "./contactRoutes.ts";
 import { categoryRoutes } from "./categoryRoutes.ts";
 import { accountRoutes } from "./accountRoutes.ts";
 import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+import { friendshipRoutes } from "./friendshipRoutes.ts";
 
 const routers = new Router();
 
@@ -37,6 +38,9 @@ routers.use(paymentRoutes.allowedMethods());
 
 routers.use(seatRoutes.routes());
 routers.use(seatRoutes.allowedMethods());
+
+routers.use(friendshipRoutes.routes());
+routers.use(friendshipRoutes.allowedMethods());
 
 routers.use(newsletterRoutes.routes());
 routers.use(newsletterRoutes.allowedMethods());

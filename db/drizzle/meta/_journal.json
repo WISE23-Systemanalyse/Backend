@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1738338195392,
-      "tag": "0000_certain_moonstone",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1738437510666,
-      "tag": "0001_windy_smiling_tiger",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1738694558693,
-      "tag": "0002_condemned_enchantress",
+      "when": 1738765195662,
+      "tag": "0000_gorgeous_spiral",
       "breakpoints": true
     }
   ]
