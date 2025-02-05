@@ -84,7 +84,8 @@ export class ShowRepository implements Repository<Show> {
         .set({
             movie_id: value.movie_id,
             hall_id: value.hall_id,
-            start_time: new Date(value.start_time)
+            start_time: new Date(value.start_time),
+            base_price: value.base_price
         })
         .where(eq(shows.id, id))
         .returning();

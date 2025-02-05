@@ -22,9 +22,11 @@ export class CategoryRepository implements Repository<Category> {
     }
 
     async update(id: Category['id'], value: Create<Category>): Promise<Category> {
-        const [updatedCategory] = await db
-            .update(categories)
-            .set(value)
+        const [updatedCategory] = await db.update(categories)
+            .set({
+                category_name: value.category_name,
+                surcharge: value.surcharge,
+            })
             .where(eq(categories.id, id))
             .returning();
         return updatedCategory;
