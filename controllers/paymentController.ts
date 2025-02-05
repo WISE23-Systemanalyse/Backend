@@ -8,9 +8,7 @@ import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { categoryRepositoryObj } from "../db/repositories/categories.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 
-
 export class PaymentController implements Controller<Payment> {
-
   async getAll(ctx: Context): Promise<void> {
     const payments = await paymentRepositoryObj.findAll();
     ctx.response.body = payments;
@@ -86,55 +84,55 @@ export class PaymentController implements Controller<Payment> {
     if (payment) {
       ctx.response.body = payment;
     } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "Payment not found" };
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Payment not found" };
     }
+  }
+  async delete(ctx: Context): Promise<void> {
+    const { id } = ctx.params;
+    if (!id) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Id parameter is required" };
+      return;
     }
-    async delete(ctx: Context): Promise<void> {
-        const { id } = ctx.params;
-        if (!id) {
-            ctx.response.status = 400;
-            ctx.response.body = { message: "Id parameter is required" };
-            return;
-        }
-        const payment = await paymentRepositoryObj.find(id);
-        if (payment) {
-            await paymentRepositoryObj.delete(id);
-            ctx.response.status = 204;
-        } else {
-            ctx.response.status = 404;
-            ctx.response.body = { message: "Payment not found" };
-        }
+    const payment = await paymentRepositoryObj.find(id);
+    if (payment) {
+      await paymentRepositoryObj.delete(id);
+      ctx.response.status = 204;
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Payment not found" };
     }
+  }
 
-    async createPayPalOrder(ctx: Context): Promise<void> {
-      const { seats, showId } = await ctx.request.body.json();
-      
-      // Calculate total with tax
-      const show = await showRepositoryObj.find(showId);
-      const seatDetails = await Promise.all(
-        seats.map(async (seatId: number) => {
-          const seat = await seatRepositoryObj.find(seatId);
-          const category = await categoryRepositoryObj.find(seat?.category_id!);
-          return { seat, category };
-        })
-      );
-  
-      const items = seatDetails.map(({ seat, category }) => ({
-        name: `Seat R${seat.row_number} P${seat.seat_number}`,
-        quantity: 1,
-        price: show?.base_price + category.surcharge
-      }));
-  
-      try {
-        const order = await payPalServiceObj.createOrder(items);
-        ctx.response.status = 200;
-        ctx.response.body = order;
-      } catch (error) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: error.message };
-      }
+  async createPayPalOrder(ctx: Context): Promise<void> {
+    const { seats, showId } = await ctx.request.body.json();
+
+    // Calculate total with tax
+    const show = await showRepositoryObj.find(showId);
+    const seatDetails = await Promise.all(
+      seats.map(async (seatId: number) => {
+        const seat = await seatRepositoryObj.find(seatId);
+        const category = await categoryRepositoryObj.find(seat?.category_id!);
+        return { seat, category };
+      }),
+    );
+
+    const items = seatDetails.map(({ seat, category }) => ({
+      name: `Seat R${seat.row_number} P${seat.seat_number}`,
+      quantity: 1,
+      price: show?.base_price + category.surcharge,
+    }));
+
+    try {
+      const order = await payPalServiceObj.createOrder(items);
+      ctx.response.status = 200;
+      ctx.response.body = order;
+    } catch (error) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: error.message };
     }
+  }
 
   async capturePayPalOrder(ctx: Context): Promise<void> {
     const { orderId } = ctx.params;
@@ -156,24 +154,29 @@ export class PaymentController implements Controller<Payment> {
 
   async finalizeBooking(ctx: Context): Promise<void> {
     const { orderId, seats, showId, userId } = await ctx.request.body.json();
-    
-      // 1. Capture PayPal payment
-      const captureData = await payPalServiceObj.captureOrder(orderId);
-      
-      // 2. Create payment record
-      const payment = await paymentRepositoryObj.create(
-        {
-          amount: Number(captureData.purchase_units[0].amount.value),
-          tax: Number(captureData.purchase_units[0].amount.breakdown.tax_total.value),
-          payment_details: JSON.stringify(captureData),
-          payment_method: 'PayPal',
-          payment_status: 'completed',
-          payment_time: new Date(),
-          time_of_payment: new Date()
 
-        }
-      );
+    // 1. Capture PayPal payment
+    const captureData = await payPalServiceObj.captureOrder(orderId);
+    const amount = await captureData.purchase_units[0].payments.captures[0]
+      .amount.value;
+    const tax = (amount * 19) / 119; // tax is 19% of the total amount
 
+
+    // 2. Create payment record
+    const payment = await paymentRepositoryObj.create(
+      {
+        amount: Number(amount),
+        tax: tax,
+        payment_method: "PayPal",
+        payment_status: "completed",
+        payment_time: new Date(),
+        time_of_payment: new Date(),
+        payment_details: "JSON.stringify(captureData)",
+      },
+    );
+
+    try {
+      // 3. Create booking records
       const bookings = await Promise.all(
         seats.map((seatId: number) => {
           return bookingRepositoryObj.create({
@@ -181,21 +184,22 @@ export class PaymentController implements Controller<Payment> {
             show_id: showId,
             user_id: userId,
             payment_id: payment.id,
-            token: Math.random().toString(36).substring(2, 15) + 
-                   Math.random().toString(36).substring(2, 15),
-            booking_time: new Date()
+            token: Math.random().toString(36).substring(2, 15) +
+              Math.random().toString(36).substring(2, 15),
+            booking_time: new Date(),
           });
-        })
+        }),
       );
-  
       ctx.response.status = 201;
-      ctx.response.body = { 
+      ctx.response.body = {
         payment_id: payment.id,
-        bookings 
+        bookings,
       };
-    } catch (error) {
+    } catch (e) {
+      console.error(e);
       ctx.response.status = 400;
-      ctx.response.body = { message: error.message };
+      ctx.response.body = { message: e.message };
+      return;
     }
   }
 }
