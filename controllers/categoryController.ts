@@ -57,28 +57,26 @@ export class CategoryController implements Controller<Category> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const value = await ctx.request.body();
+    const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    const contextCategory: Category = await value.value;
-    try {
-      const { category_name } = contextCategory;
-      if (!category_name) {
-        ctx.response.status = 400;
-        ctx.response.body = { message: "Name is required" };
-        return;
-      }
-    } catch (e) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "Invalid JSON" };
-      return;
+    const contextCategory: Category = await value.json();
+    const category = await categoryRepositoryObj.find(contextCategory.id);
+    if (category) {
+      console.log(contextCategory);
+      const updatedCategory = await categoryRepositoryObj.update(
+        contextCategory.id, 
+        contextCategory
+      );
+      ctx.response.status = 200;
+      ctx.response.body = updatedCategory;
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Category not found" };
     }
-    const category = await categoryRepositoryObj.update(id, contextCategory);
-    ctx.response.status = 200;
-    ctx.response.body = category;
   }
 
   async delete(ctx: Context): Promise<void> {

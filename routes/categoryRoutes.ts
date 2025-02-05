@@ -9,6 +9,6 @@ categoryRoutes
     .get("/categories", categoryController.getAll)
     .post("/categories", categoryController.create)
     .put("/categories/:id", categoryController.update)
-    .delete("/categories:id", categoryController.delete);
+    .delete("/categories/:id", categoryController.delete);
 
 export { categoryRoutes };
