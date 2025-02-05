@@ -633,7 +633,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "varchar",
           "primaryKey": true,
           "notNull": true
         },

@@ -8,7 +8,7 @@ import { InvalidPassword, InvalidVerificationCode, UserAllreadyExists, UserNotFo
 import { emailServiceObj } from "./emailService.ts";
 import * as bycript from "https://deno.land/x/bcrypt/mod.ts";
 
-const EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
+const VERIFICATIONCODE_EXPIRETIME = 1000 * 60 * 60 * 24; // 24 hours
 
 export class UserAuthService {
   async verifyUser(email: string, code: string): Promise<void> {
@@ -28,7 +28,7 @@ export class UserAuthService {
         throw new InvalidVerificationCode();
       }
 
-      // Update verification status
+      // Update User verification status
       await tx
         .update(users)
         .set({ isVerified: true })
@@ -106,7 +106,7 @@ export class UserAuthService {
         }
 
         const now = new Date();
-        const expireAt = new Date(now.getTime() + EXPIRETIME);
+        const expireAt = new Date(now.getTime() + VERIFICATIONCODE_EXPIRETIME);
   
         // Find existing verification code
         const existingCode = await tx.query.verificationCodes.findFirst({
