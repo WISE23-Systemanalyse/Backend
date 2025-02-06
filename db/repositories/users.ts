@@ -1,16 +1,19 @@
 import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
+import { Create } from "../../interfaces/repository.ts";
 import { users, User } from "../models/users.ts";
 import { eq } from "drizzle-orm";
+import { BaseRepository } from "./baseRepository.ts";
 
-
-export class UserRepository implements Repository<User> {
-    async findAll(): Promise<any[]> {
-        const allUsers = await db.select().from(users);
-        const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
-        return usersWithoutPassword;
+export class UserRepository extends BaseRepository<User> {
+    constructor() {
+        super(users);
     }
-    async find(id: User['id']): Promise< any | null> {
+    override async findAll(): Promise<any[]> {
+      const allUsers = await db.select().from(users);
+      const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
+      return usersWithoutPassword;
+    }
+    override async find(id: User['id']): Promise< any | null> {
         const result = await db.query.users.findFirst({
             where: eq(users.id, id),
           });
@@ -18,10 +21,8 @@ export class UserRepository implements Repository<User> {
         const { password: _password, ...user } = result;
         return user;
     }
-    async delete(id: User['id']): Promise<void> {
-        await db.delete(users).where(eq(users.id, id));
-    }
-    async create(value: Create<User>): Promise<User> {
+
+    override async create(value: Create<User>): Promise<User> {
       try {
         const [user] = await db.insert(users).values({
           ...value,
@@ -31,10 +32,6 @@ export class UserRepository implements Repository<User> {
       } catch (error) {
         throw error;
       }
-    }
-    async update(id: User['id'], value: any): Promise<User> {
-        const [updatedUser] = await db.update(users).set(value).where(eq(users.id, id)).returning();
-        return updatedUser;
     }
 
     async findByEmail(email: User['email']): Promise<User | null> {

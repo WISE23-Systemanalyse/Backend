@@ -1,15 +1,16 @@
 import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
+import { Create } from "../../interfaces/repository.ts";
 import { Show, shows, ShowWithDetails} from "../models/shows.ts";
 import { movies } from "../models/movies.ts";
 import { halls } from "../models/halls.ts";
 import { eq, gte, and } from "drizzle-orm";
+import { BaseRepository } from "./baseRepository.ts";
 
-export class ShowRepository implements Repository<Show> {
-  async findAll(): Promise<Show[]> {
-    const allShows = await db.select().from(shows);
-    return allShows;
+export class ShowRepository extends  BaseRepository<Show> {
+  constructor() {
+    super(shows);
   }
+
   async findAllWithDetails(): Promise<{id: number, movie_id: number, hall_id: number, start_time: Date, title: string | null, description: string | null, image_url: string | null, name: string | null}[]> {
     try {
         // Aktuelles Datum um Mitternacht (Start des Tages)
@@ -43,12 +44,6 @@ export class ShowRepository implements Repository<Show> {
     }
   }
  
-  async find(id: Show["id"]): Promise<Show | null> {
-    const result = await db.query.shows.findFirst({
-      where: eq(shows.id, id),
-    });
-    return result ?? null;
-  }
   async findOneWithDetails(id: Show["id"]): Promise<ShowWithDetails | null> {
     const result = await db
         .select({
@@ -70,14 +65,8 @@ export class ShowRepository implements Repository<Show> {
     const show = result[0];
     return show ?? null;
   }
-  async delete(id: Show["id"]): Promise<void> {
-    await db.delete(shows).where(eq(shows.id, id));
-  }
-  async create(value: any): Promise<Show> {
-    const [show] = await db.insert(shows).values(value).returning();
-    return show;
-  }
-  async update(id: Show["id"], value: Create<Show>): Promise<Show> {
+
+  override async update(id: Show["id"], value: Create<Show>): Promise<Show> {
   
     // Direkt das Datum-Objekt erstellen
     const [updatedShow] = await db.update(shows)
