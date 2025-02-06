@@ -37,19 +37,90 @@ Die Anwendung läuft nun standardmäßig auf `http://localhost:8000`.
 
 ## API-Endpunkte
 
-GET /api/status
+### Status
+- `GET /status` - Überprüft den Status des Systems
 
-GET /movies/api/movies -> gibt id’s von allen Filmen + Titel, Genre<br>
-GET /movies/:id -> gibt Informationen über einen Film (alle infos)<br>
-GET /movies/:id/thumbnail -> gibt das Thumbnail zurück<br>
-GET /api/movies/:id/seats -> gibt die Sitzplätze für einen Film zurück
+### Filme
+- `GET /movies` - Liste aller Filme
+- `GET /movies/:id` - Details eines bestimmten Films
+- `GET /movies/:id/shows` - Zeigt alle Vorführungen eines Films
+- `GET /movies/tmdb/search` - Suche nach Filmen in TMDB
+- `GET /movies/tmdb/popular` - Beliebte Filme von TMDB
+- `POST /movies` - Neuen Film erstellen
+- `PUT /movies/:id` - Film aktualisieren
+- `DELETE /movies/:id` - Film löschen
 
-POST /api/reserve -> "expiresAt": "2024-12-01T10:00:00Z"<br>
-DELETE /api/reserve
+### Benutzer & Authentifizierung
+- `POST /signup` - Neuen Benutzer registrieren
+- `POST /signin` - Benutzer anmelden
+- `POST /verifyemail` - E-Mail-Adresse verifizieren
+- `GET /users` - Alle Benutzer auflisten
+- `GET /users/:id` - Benutzerdetails abrufen
+- `PUT /users/:id` - Benutzerdaten aktualisieren
+- `DELETE /users/:id` - Benutzer löschen
+- `GET /users/:id/bookings` - Buchungen eines Benutzers anzeigen
 
-GET /api/cart -> zeigt die Reservierungen des Benutzers an<br>
-POST /api/checkout
+### Buchungen
+- `GET /bookings` - Alle Buchungen anzeigen
+- `GET /bookings/details` - Detaillierte Buchungsübersicht
+- `GET /bookings/:id` - Details einer Buchung
+- `GET /bookings/payment/:paymentId` - Buchung nach Zahlungs-ID
+- `POST /bookings` - Neue Buchung erstellen
+- `PUT /bookings/:id` - Buchung aktualisieren
+- `DELETE /bookings/:id` - Buchung stornieren
 
-POST /api/register<br>
-POST /api/login<br>
-POST /api/logout
+### Vorführungen
+- `GET /shows` - Alle Vorführungen
+- `GET /shows/details` - Detaillierte Vorführungsübersicht
+- `GET /shows/:id` - Details einer Vorführung
+- `GET /shows/hall/:id` - Vorführungen eines Saals
+- `GET /shows/:id/seats` - Sitzplatzstatus einer Vorführung
+- `GET /shows/:id/bookings` - Buchungen einer Vorführung
+- `POST /shows` - Neue Vorführung erstellen
+- `POST /shows/:id/book` - Sitzplatz für Vorführung buchen
+- `PUT /shows/:id` - Vorführung aktualisieren
+- `DELETE /shows/:id` - Vorführung löschen
+
+### Säle & Sitzplätze
+- `GET /halls` - Alle Kinosäle
+- `GET /halls/:id` - Details eines Saals
+- `GET /halls/:id/seats` - Sitzplätze eines Saals
+- `POST /halls` - Neuen Saal erstellen
+- `PUT /halls/:id` - Saal aktualisieren
+- `DELETE /halls/:id` - Saal löschen
+
+- `GET /seats` - Alle Sitzplätze
+- `GET /seats/:id` - Details eines Sitzplatzes
+- `POST /seats` - Sitzplatz erstellen
+- `POST /seats/:id/reserve` - Sitzplatz reservieren
+- `POST /seats/bulk` - Mehrere Sitzplätze erstellen
+- `PUT /seats/bulk` - Mehrere Sitzplätze aktualisieren
+- `DELETE /seats/bulk` - Mehrere Sitzplätze löschen
+
+### Zahlungen
+- `GET /payments` - Alle Zahlungen
+- `GET /payments/:id` - Details einer Zahlung
+- `POST /payments` - Neue Zahlung erstellen
+- `POST /payments/create-order` - PayPal-Bestellung erstellen
+- `POST /payments/finalize` - Buchung abschließen
+- `PUT /payments/:id` - Zahlung aktualisieren
+- `DELETE /payments/:id` - Zahlung löschen
+
+### Kategorien
+- `GET /categories` - Alle Kategorien
+- `GET /categories/:id` - Details einer Kategorie
+- `POST /categories` - Neue Kategorie erstellen
+- `PUT /categories/:id` - Kategorie aktualisieren
+- `DELETE /categories/:id` - Kategorie löschen
+
+### Freundschaften
+- `GET /friendships` - Alle Freundschaften
+- `GET /friendships/:id` - Details einer Freundschaft
+- `GET /friendships/user/:userId` - Freundschaften eines Benutzers
+- `POST /friendships` - Neue Freundschaft erstellen
+- `PUT /friendships/:id` - Freundschaft aktualisieren
+- `DELETE /friendships/:id` - Freundschaft löschen
+
+### Sonstiges
+- `POST /newsletter/subscribe` - Newsletter-Anmeldung
+- `POST /contact` - Kontaktformular absenden
