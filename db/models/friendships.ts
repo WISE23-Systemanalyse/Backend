@@ -1,7 +1,6 @@
 import { pgTable, varchar, serial } from "drizzle-orm/pg-core";
 import { users } from "./users.ts";
 import { relations } from "drizzle-orm/relations";
-import { sql } from "drizzle-orm";
 
 export const friendships = pgTable("friends", {
   id: serial('id').primaryKey(),
@@ -14,24 +13,6 @@ export const friendships = pgTable("friends", {
   }
 }));
 
-// Trigger-Definition (muss einmalig ausgeführt werden):
-sql`
-CREATE OR REPLACE FUNCTION order_friendship_users()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.user1_id > NEW.user2_id THEN
-    SELECT NEW.user2_id, NEW.user1_id 
-    INTO NEW.user1_id, NEW.user2_id;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER friendship_order_trigger
-BEFORE INSERT OR UPDATE ON friends
-FOR EACH ROW
-EXECUTE FUNCTION order_friendship_users();
-`;
 
 export const friendshipsRelations = relations(friendships, ({ one }) => ({
   user1: one(users, {
