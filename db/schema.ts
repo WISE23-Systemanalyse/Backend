@@ -8,6 +8,7 @@ import * as paymentsSchema from "./models/payments.ts";
 import * as reservationsSchema from "./models/reservations.ts";
 import * as VerificationCodeSchema from "./models/verificationCodes.ts";
 import * as categorySchema from "./models/categories.ts";
+import * as friendshipsSchema from "./models/friendships.ts";
 
 export const schema = {
   ...usersSchema,
@@ -19,5 +20,6 @@ export const schema = {
   ...paymentsSchema,
   ...categorySchema,
   ...reservationsSchema,
-  ...VerificationCodeSchema
+  ...VerificationCodeSchema,
+  ...friendshipsSchema
 };

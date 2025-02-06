@@ -6,5 +6,6 @@ import { hallRepository } from "./halls.ts";
 import { userRepositoryObj } from "./users.ts";
 import { hallController } from "../../controllers/hallController.ts";
 import { paymentRepositoryObj } from "./payments.ts";
+import { FriendshipRepository } from "./friendships.ts";
 
-export { bookingRepositoryObj, movieRepository, showRepositoryObj, seatRepositoryObj, hallRepository, userRepositoryObj, hallController, paymentRepositoryObj};
+export { bookingRepositoryObj, movieRepository, showRepositoryObj, seatRepositoryObj, hallRepository, userRepositoryObj, hallController, paymentRepositoryObj, FriendshipRepository};

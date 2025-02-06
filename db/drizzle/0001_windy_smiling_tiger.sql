@@ -1,2 +1,0 @@
-ALTER TABLE "users" ADD CONSTRAINT "users_user_name_unique" UNIQUE("user_name");--> statement-breakpoint
-ALTER TABLE "verification_codes" ADD CONSTRAINT "verification_codes_email_unique" UNIQUE("email");

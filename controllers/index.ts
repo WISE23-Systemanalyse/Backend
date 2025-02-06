@@ -9,6 +9,7 @@ import { paymentController } from "./paymentController.ts";
 import { seatController } from "./seatController.ts";
 import { newsletterController } from "./newsletterController.ts";
 import { contactController } from "./contactController.ts";
+import { friendshipController } from "./friendshipController.ts";
 
 export {
   bookingController,
@@ -21,5 +22,6 @@ export {
   showControllerObj,
   statusController,
   userController,
-  accountController
+  accountController,
+  friendshipController
 };

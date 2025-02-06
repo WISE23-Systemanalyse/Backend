@@ -17,6 +17,12 @@ CREATE TABLE IF NOT EXISTS "category" (
 	CONSTRAINT "category_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "friends" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"user1_id" varchar NOT NULL,
+	"user2_id" varchar NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "hall" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
@@ -93,7 +99,8 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"is_admin" boolean DEFAULT false,
 	"is_verified" boolean DEFAULT false,
 	CONSTRAINT "users_id_unique" UNIQUE("id"),
-	CONSTRAINT "users_email_unique" UNIQUE("email")
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
+	CONSTRAINT "users_user_name_unique" UNIQUE("user_name")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "verification_codes" (
@@ -102,7 +109,7 @@ CREATE TABLE IF NOT EXISTS "verification_codes" (
 	"code" varchar(6) NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"expires_at" timestamp NOT NULL,
-	"is_used" boolean DEFAULT false
+	CONSTRAINT "verification_codes_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN
@@ -125,6 +132,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "bookings" ADD CONSTRAINT "bookings_payment_id_payments_id_fk" FOREIGN KEY ("payment_id") REFERENCES "public"."payments"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "friends" ADD CONSTRAINT "friends_user1_id_users_id_fk" FOREIGN KEY ("user1_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "friends" ADD CONSTRAINT "friends_user2_id_users_id_fk" FOREIGN KEY ("user2_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

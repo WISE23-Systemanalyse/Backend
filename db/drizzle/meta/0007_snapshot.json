@@ -1,6 +1,6 @@
 {
-  "id": "0dcd8c76-5f9f-4c9b-a7f2-7b38bace2d56",
-  "prevId": "39cc8f0a-75f5-49c5-a895-81fc6c54ac6d",
+  "id": "d4e6d1f8-7590-49fa-8250-eceaa218f26d",
+  "prevId": "33e52a70-7ece-4bf7-b757-cc3e294594c0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -18,7 +18,13 @@
           "name": "user_id",
           "type": "varchar",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
         },
         "show_id": {
           "name": "show_id",
@@ -164,6 +170,64 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.friends": {
+      "name": "friends",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user1_id": {
+          "name": "user1_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user2_id": {
+          "name": "user2_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "friends_user1_id_users_id_fk": {
+          "name": "friends_user1_id_users_id_fk",
+          "tableFrom": "friends",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "friends_user2_id_users_id_fk": {
+          "name": "friends_user2_id_users_id_fk",
+          "tableFrom": "friends",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -327,12 +391,6 @@
         },
         "payment_status": {
           "name": "payment_status",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payment_details": {
-          "name": "payment_details",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
@@ -767,13 +825,6 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true
-        },
-        "is_used": {
-          "name": "is_used",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false,
-          "default": false
         }
       },
       "indexes": {},
