@@ -16,7 +16,7 @@ export class CategoryController implements Controller<Category> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const category = await categoryRepositoryObj.find(id);
+    const category = await categoryRepositoryObj.find(Number(id));
     if (category) {
       ctx.response.body = category;
     } else {

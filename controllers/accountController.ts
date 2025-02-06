@@ -1,6 +1,14 @@
 import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { userAuthServiceObj } from "../services/userAuthService.ts";
 
+// Custom Error Klasse für bessere Typisierung
+class CustomError extends Error {
+  status: number;
+  constructor(message: string, status: number = 500) {
+    super(message);
+    this.status = status;
+  }
+}
 
 export class AccountController {
   async signup(ctx: RouterContext<"/signup">): Promise<void> {
@@ -10,10 +18,9 @@ export class AccountController {
         .json();
 
       if (!email || !password || !userName) {
-        ctx.response.status = 400;
-        ctx.response.body = { error: "Email and password and UserName are required." };
-        return;
+        throw new CustomError("Email and password and UserName are required.", 400);
       }
+      
       const newUser = {
         id: crypto.randomUUID(),
         email,
@@ -27,17 +34,26 @@ export class AccountController {
         isAdmin: false,
         isVerified: false,
       };
+      
       try {
         await userAuthServiceObj.register(newUser);
         ctx.response.status = 201;
         ctx.response.body = { message: "User created successfully" };
       } catch (error) {
-        throw error;  
+        if (error instanceof Error) {
+          throw new CustomError(error.message, 500);
+        }
+        throw new CustomError("An unknown error occurred", 500);
       }
 
     } catch (error) {
-      ctx.response.status = error.status || 500;
-      ctx.response.body = { error: error.message };
+      if (error instanceof CustomError) {
+        ctx.response.status = error.status;
+        ctx.response.body = { error: error.message };
+      } else {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "An unknown error occurred" };
+      }
     }
   }
 
@@ -47,23 +63,27 @@ export class AccountController {
       const { email, code } = await body.json();
 
       if (!email || !code) {
-        ctx.response.status = 400;
-        ctx.response.body = { error: "Email and code are required." };
-        return;
+        throw new CustomError("Email and code are required.", 400);
       }
 
-      // Führe alle DB-Operationen in einer Transaktion aus
       try {
         await userAuthServiceObj.verifyUser(email, code);
         ctx.response.status = 201;
         ctx.response.body = { message: "User verified successfully" };
       } catch (error) {
-        ctx.response.status = error.status || 500;
-        ctx.response.body = { error: error.message };
+        if (error instanceof Error) {
+          throw new CustomError(error.message, 500);
+        }
+        throw new CustomError("An unknown error occurred", 500);
       }
     } catch (error) {
-      ctx.response.status = error.status || 500;
-      ctx.response.body = { error: error.message };
+      if (error instanceof CustomError) {
+        ctx.response.status = error.status;
+        ctx.response.body = { error: error.message };
+      } else {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "An unknown error occurred" };
+      }
     }
   }
 
@@ -73,26 +93,31 @@ export class AccountController {
       const { email, password } = await body.json();
 
       if (!email || !password) {
-        ctx.response.status = 400;
-        ctx.response.body = { error: "Email and password are required." };
-        return;
+        throw new CustomError("Email and password are required.", 400);
       }
+      
       try {
         const token = await userAuthServiceObj.login(email, password);
         ctx.response.status = 200;
         ctx.response.body = {
-        "token":token,
-      };
+          "token": token,
+        };
       } catch (error) {
-        ctx.response.status = error.status;
-        ctx.response.body = { error: error.message };
+        if (error instanceof Error) {
+          throw new CustomError(error.message, 401);
+        }
+        throw new CustomError("An unknown error occurred", 500);
       }
     } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { error: error.message };
+      if (error instanceof CustomError) {
+        ctx.response.status = error.status;
+        ctx.response.body = { error: error.message };
+      } else {
+        ctx.response.status = 500;
+        ctx.response.body = { error: "An unknown error occurred" };
+      }
     }
   }
-
 }
 
 export const accountController = new AccountController();

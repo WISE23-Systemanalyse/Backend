@@ -5,7 +5,7 @@ import { Friendship } from "../db/models/friendships.ts";
 import { userRepositoryObj } from "../db/repositories/users.ts";
 
 export class FriendshipController implements Controller<Friendship> {
-  update(ctx: Context<string>): Promise<void> {
+  async update(ctx: RouterContext<"/friendships/:id"> ): Promise<void> {
       throw new Error("Method not implemented.");
   }
   async getAll(ctx: Context): Promise<void> {

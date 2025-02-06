@@ -53,7 +53,7 @@ export class ContactController {
             }
 
             // Kontaktformular-E-Mail senden
-            await emailService.sendContactFormMail({ 
+            await emailServiceObj.sendContactFormMail({ 
                 name: name.trim(), 
                 email: email.trim(), 
                 subject: subject.trim(), 
