@@ -1,5 +1,5 @@
 import { db } from "../db.ts";
-import { Create } from "../../interfaces/repository.ts";
+import { Create, Repository } from "../../interfaces/repository.ts";
 import { Reservation, reservations } from "../models/reservations.ts";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { shows } from "../models/shows.ts";
@@ -17,11 +17,18 @@ import { BaseRepository } from "./baseRepository.ts";
 const RESERVATION_TIME = 10*60*1000 // 10 minute in milliseconds
 
 export class ReservationRepository extends BaseRepository<Reservation> {
+ 
   constructor() {
-    super(reservations);
+    super(shows);
   }
 
-  
+  async findByShowId(showId: Reservation["show_id"]): Promise<Reservation[]> {
+    const result = await db.select()
+      .from(reservations)
+      .where(eq(reservations.show_id, showId));
+    return result;
+  }
+
   override async create(value: Create<Reservation>): Promise<Reservation> {
     try {
       return await db.transaction(async (tx) => {

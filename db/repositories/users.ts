@@ -8,12 +8,12 @@ export class UserRepository extends BaseRepository<User> {
     constructor() {
         super(users);
     }
-    override async findAll(): Promise<User[]> {
+    override async findAll(): Promise<any[]> {
       const allUsers = await db.select().from(users);
       const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
       return usersWithoutPassword;
     }
-    async find(id: User['id']): Promise< any | null> {
+    override async find(id: User['id']): Promise< any | null> {
         const result = await db.query.users.findFirst({
             where: eq(users.id, id),
           });
@@ -21,10 +21,8 @@ export class UserRepository extends BaseRepository<User> {
         const { password: _password, ...user } = result;
         return user;
     }
-    async delete(id: User['id']): Promise<void> {
-        await db.delete(users).where(eq(users.id, id));
-    }
-    async create(value: Create<User>): Promise<User> {
+
+    override async create(value: Create<User>): Promise<User> {
       try {
         const [user] = await db.insert(users).values({
           ...value,
@@ -34,10 +32,6 @@ export class UserRepository extends BaseRepository<User> {
       } catch (error) {
         throw error;
       }
-    }
-    async update(id: User['id'], value: any): Promise<User> {
-        const [updatedUser] = await db.update(users).set(value).where(eq(users.id, id)).returning();
-        return updatedUser;
     }
 
     async findByEmail(email: User['email']): Promise<User | null> {

@@ -1,5 +1,4 @@
 import { db } from "../db.ts";
-import { Repository } from "../../interfaces/repository.ts";
 import { categories, Category } from "../models/categories.ts";
 import { eq } from "drizzle-orm";
 import { BaseRepository } from "./baseRepository.ts";
