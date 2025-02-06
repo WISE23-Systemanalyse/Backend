@@ -153,7 +153,17 @@ export class PaymentController implements Controller<Payment> {
   }
 
   async finalizeBooking(ctx: Context): Promise<void> {
-    const { orderId, seats, showId, userId } = await ctx.request.body.json();
+    const { orderId, seats, showId, userId, guest_email } = await ctx.request.body.json();
+
+    if (!orderId || !seats || !showId) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Missing required fields" };
+    }
+
+    if (!userId && !guest_email) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "User ID or guest email is required" };
+    }
 
     // 1. Capture PayPal payment
     const captureData = await payPalServiceObj.captureOrder(orderId);
@@ -171,7 +181,6 @@ export class PaymentController implements Controller<Payment> {
         payment_status: "completed",
         payment_time: new Date(),
         time_of_payment: new Date(),
-        payment_details: "JSON.stringify(captureData)",
       },
     );
 
@@ -184,6 +193,7 @@ export class PaymentController implements Controller<Payment> {
             show_id: showId,
             user_id: userId,
             payment_id: payment.id,
+            email: guest_email,
             token: Math.random().toString(36).substring(2, 15) +
               Math.random().toString(36).substring(2, 15),
             booking_time: new Date(),
