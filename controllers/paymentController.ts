@@ -1,5 +1,4 @@
-import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
+import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { paymentRepositoryObj } from "../db/repositories/index.ts";
 import { Payment } from "../db/models/payments.ts";
 import { payPalServiceObj } from "../services/payPalService.ts";
@@ -8,20 +7,20 @@ import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { categoryRepositoryObj } from "../db/repositories/categories.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 
-export class PaymentController implements Controller<Payment> {
-  async getAll(ctx: Context): Promise<void> {
+export class PaymentController {
+  async getAll(ctx: RouterContext<"/payments">): Promise<void> {
     const payments = await paymentRepositoryObj.findAll();
     ctx.response.body = payments;
   }
 
-  async getOne(ctx: Context): Promise<void> {
+  async getOne(ctx: RouterContext<"/payments/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const payment = await paymentRepositoryObj.find(id);
+    const payment = await paymentRepositoryObj.find(Number(id));
     if (payment) {
       ctx.response.body = payment;
     } else {
@@ -30,7 +29,7 @@ export class PaymentController implements Controller<Payment> {
     }
   }
 
-  async create(ctx: Context): Promise<void> {
+  async create(ctx: RouterContext<"/payments">): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -55,7 +54,7 @@ export class PaymentController implements Controller<Payment> {
     ctx.response.body = payment;
   }
 
-  async update(ctx: Context): Promise<void> {
+  async update(ctx: RouterContext<"/payments/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -80,7 +79,7 @@ export class PaymentController implements Controller<Payment> {
       return;
     }
 
-    const payment = await paymentRepositoryObj.update(id, contextPayment);
+    const payment = await paymentRepositoryObj.update(Number(id), contextPayment);
     if (payment) {
       ctx.response.body = payment;
     } else {
@@ -88,16 +87,16 @@ export class PaymentController implements Controller<Payment> {
       ctx.response.body = { message: "Payment not found" };
     }
   }
-  async delete(ctx: Context): Promise<void> {
+  async delete(ctx: RouterContext<"/payments/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const payment = await paymentRepositoryObj.find(id);
+    const payment = await paymentRepositoryObj.find(Number(id));
     if (payment) {
-      await paymentRepositoryObj.delete(id);
+      await paymentRepositoryObj.delete(Number(id));
       ctx.response.status = 204;
     } else {
       ctx.response.status = 404;
@@ -105,7 +104,7 @@ export class PaymentController implements Controller<Payment> {
     }
   }
 
-  async createPayPalOrder(ctx: Context): Promise<void> {
+  async createPayPalOrder(ctx: RouterContext<"/payments/create-order">): Promise<void> {
     const { seats, showId } = await ctx.request.body.json();
 
     // Calculate total with tax
@@ -128,13 +127,13 @@ export class PaymentController implements Controller<Payment> {
       const order = await payPalServiceObj.createOrder(items);
       ctx.response.status = 200;
       ctx.response.body = order;
-    } catch (error) {
+    } catch (error: any) {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
   }
 
-  async capturePayPalOrder(ctx: Context): Promise<void> {
+  async capturePayPalOrder(ctx: RouterContext<"/payments/capture/:orderId">): Promise<void> {
     const { orderId } = ctx.params;
     if (!orderId) {
       ctx.response.status = 400;
@@ -146,13 +145,13 @@ export class PaymentController implements Controller<Payment> {
       const captureData = await payPalServiceObj.captureOrder(orderId);
       ctx.response.status = 200;
       ctx.response.body = captureData;
-    } catch (e) {
+    } catch (error: any) {
       ctx.response.status = 400;
-      ctx.response.body = { message: e.message };
+      ctx.response.body = { message: error.message };
     }
   }
 
-  async finalizeBooking(ctx: Context): Promise<void> {
+  async finalizeBooking(ctx: RouterContext<"/payments/finalize">): Promise<void> {
     const { orderId, seats, showId, userId, guest_email } = await ctx.request.body.json();
 
     if (!orderId || !seats || !showId) {
@@ -205,10 +204,9 @@ export class PaymentController implements Controller<Payment> {
         payment_id: payment.id,
         bookings,
       };
-    } catch (e) {
-      console.error(e);
+    } catch (error: any) {
       ctx.response.status = 400;
-      ctx.response.body = { message: e.message };
+      ctx.response.body = { message: error.message };
       return;
     }
   }

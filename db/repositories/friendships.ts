@@ -18,13 +18,13 @@ export class FriendshipRepository extends BaseRepository<Friendship> {
         return result || null;
     }
 
-    async findFriendshipsByUserId(userId: number): Promise<Friendship[]> {
+    async findFriendshipsByUserId(userId: string): Promise<Friendship[]> {
         return await db.select()
             .from(friendships)
             .where(
                 or(
-                    eq(friendships.user1Id, userId.toString()),
-                    eq(friendships.user2Id, userId.toString())
+                    eq(friendships.user1Id, userId),
+                    eq(friendships.user2Id, userId)
                 )
             );
     }

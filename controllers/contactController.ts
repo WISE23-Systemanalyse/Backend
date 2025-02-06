@@ -16,7 +16,7 @@ export class ContactController {
             let formData;
             try {
                 formData = await value.json();
-            } catch (error) {
+            } catch (_error) {
                 ctx.response.status = 400;
                 ctx.response.body = { message: "Ungültiges JSON Format" };
                 return;

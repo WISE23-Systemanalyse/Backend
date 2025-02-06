@@ -1,9 +1,8 @@
 import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { Booking } from "../db/models/bookings.ts";
 
-export class BookingController implements Controller<Booking> {
+export class BookingController {
   async getAll(ctx: RouterContext<"/bookings">): Promise<void> {
     const bookings = await bookingRepositoryObj.findAll();
     ctx.response.body = bookings;

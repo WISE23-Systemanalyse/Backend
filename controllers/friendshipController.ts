@@ -1,11 +1,9 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
 import { friendshipRepositoryObj } from "../db/repositories/friendships.ts";
-import { Friendship } from "../db/models/friendships.ts";
 import { userRepositoryObj } from "../db/repositories/users.ts";
 
-export class FriendshipController implements Controller<Friendship> {
-  async update(ctx: RouterContext<"/friendships/:id"> ): Promise<void> {
+export class FriendshipController{
+  update(_ctx: RouterContext<"/friendships/:id"> ): Promise<void> {
       throw new Error("Method not implemented.");
   }
   async getAll(ctx: Context): Promise<void> {
@@ -20,7 +18,7 @@ export class FriendshipController implements Controller<Friendship> {
       ctx.response.body = { message: "Id parameter ist erforderlich" };
       return;
     }
-    const friendship = await friendshipRepositoryObj.find(id);
+    const friendship = await friendshipRepositoryObj.find(Number(id));
     if (friendship) {
       ctx.response.body = friendship;
     } else {
@@ -54,7 +52,7 @@ export class FriendshipController implements Controller<Friendship> {
       ctx.response.status = 500;
       ctx.response.body = { 
         message: "Fehler beim Abrufen der Freundschaften",
-        error: error.message 
+        error: error instanceof Error ? error.message : "Unknown error"
       };
     }
   }
@@ -75,7 +73,7 @@ export class FriendshipController implements Controller<Friendship> {
         ctx.response.status = 400;
         ctx.response.body = { 
           message: "Ungültiges JSON Format",
-          error: jsonError.message 
+          error: jsonError instanceof Error ? jsonError.message : "Unknown error"
         };
         return;
       }
@@ -83,7 +81,7 @@ export class FriendshipController implements Controller<Friendship> {
       const { user1Id, user2Id } = data;
 
       if (!user1Id || !user2Id) {
-        ctx.response.status = 400;
+        ctx.response.status = 400;  
         ctx.response.body = { message: "Beide Benutzer-IDs sind erforderlich" };
         return;
       }
@@ -120,7 +118,7 @@ export class FriendshipController implements Controller<Friendship> {
       ctx.response.body = friendship;
 
     } catch (error) {
-      if (error.message.includes("duplicate")) {
+      if (error instanceof Error && error.message.includes("duplicate")) {
         ctx.response.status = 409;
         ctx.response.body = { 
           message: "Freundschaft existiert bereits",
@@ -129,8 +127,8 @@ export class FriendshipController implements Controller<Friendship> {
       } else {
         ctx.response.status = 400;
         ctx.response.body = { 
-          message: "Fehler beim Erstellen der Freundschaft", 
-          error: error.message 
+          message: "Fehler beim Erstellen der Freundschaft",
+          error: error instanceof Error ? error.message : "Unknown error"
         };
       }
     }
@@ -143,9 +141,9 @@ export class FriendshipController implements Controller<Friendship> {
       ctx.response.body = { message: "Id parameter ist erforderlich" };
       return;
     }
-    const friendship = await friendshipRepositoryObj.find(id);
+    const friendship = await friendshipRepositoryObj.find(Number(id));
     if (friendship) {
-      await friendshipRepositoryObj.delete(id);
+      await friendshipRepositoryObj.delete(Number(id));
       ctx.response.status = 204;
     } else {
       ctx.response.status = 404;
@@ -162,12 +160,12 @@ export class FriendshipController implements Controller<Friendship> {
       return;
     }
     
-    const friendships = await friendshipRepositoryObj.findFriendshipsByUserId(parseInt(userId));
+    const friendships = await friendshipRepositoryObj.findFriendshipsByUserId(userId);
     ctx.response.body = friendships;
   }
 
   async checkFriendship(ctx: RouterContext<"/friendships/check">): Promise<void> {
-    const value = await ctx.request.body().value;
+    const value = await ctx.request.body.json();
     const { user1Id, user2Id } = value;
     
     if (!user1Id || !user2Id) {

@@ -1,19 +1,19 @@
 import { Router } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { seatController } from "../controllers/index.ts";
+import { seatControllerObj } from "../controllers/index.ts";
 
 const seatRoutes = new Router();
 
 seatRoutes
-    .get("/seats", seatController.getAll)
-    .get("/seats/:id", seatController.getOne)
-    .post("/seats", seatController.create)
-    .post("/seats/:id/reserve", seatController.reserve)
-    .put("/seats/:id", seatController.update)
-    .delete("/seats/:id", seatController.delete)
+    .get("/seats", seatControllerObj.getAll)
+    .get("/seats/:id", seatControllerObj.getOne)
+    .post("/seats", seatControllerObj.create)
+    .post("/seats/:id/reserve", seatControllerObj.reserve)
+    .put("/seats/:id", seatControllerObj.update)
+    .delete("/seats/:id", seatControllerObj.delete)
     // Bulk Operations
-    .post("/seats/bulk", seatController.bulkCreate)
-    .put("/seats/bulk", seatController.bulkUpdate)
-    .delete("/seats/bulk", seatController.bulkDelete)
-    .post("/seats/halls/:hallId/sync", seatController.syncHallSeats);
+    .post("/seats/bulk", seatControllerObj.bulkCreate)
+    .put("/seats/bulk", seatControllerObj.bulkUpdate)
+    .delete("/seats/bulk", seatControllerObj.bulkDelete)
+    .post("/seats/halls/:hallId/sync", seatControllerObj.syncHallSeats);
 
 export { seatRoutes };
