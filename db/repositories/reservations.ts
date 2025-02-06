@@ -1,5 +1,5 @@
 import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
+import { Create } from "../../interfaces/repository.ts";
 import { Reservation, reservations } from "../models/reservations.ts";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { shows } from "../models/shows.ts";
@@ -12,33 +12,17 @@ import {
   ShowNotFound,
   UserNotFound,
 } from "../../Errors/index.ts";
+import { BaseRepository } from "./baseRepository.ts";
 
 const RESERVATION_TIME = 10*60*1000 // 10 minute in milliseconds
 
-export class ReservationRepository implements Repository<Reservation> {
-  async findAll(): Promise<Reservation[]> {
-    const allReservations = await db.select().from(reservations);
-    return allReservations;
-  }
-  async find(id: Reservation["id"]): Promise<Reservation | null> {
-    const result = await db.query.reservations.findFirst({
-      where: eq(reservations.id, id),
-    });
-    return result ?? null;
+export class ReservationRepository extends BaseRepository<Reservation> {
+  constructor() {
+    super(reservations);
   }
 
-  async findByShowId(showId: Reservation["show_id"]): Promise<Reservation[]> {
-    const result = await db.select()
-      .from(reservations)
-      .where(eq(reservations.show_id, showId));
-    return result;
-  }
-
-  async delete(id: Reservation["id"]): Promise<void> {
-    await db.delete(reservations).where(eq(reservations.id, id));
-  }
-
-  async create(value: Create<Reservation>): Promise<Reservation> {
+  
+  override async create(value: Create<Reservation>): Promise<Reservation> {
     try {
       return await db.transaction(async (tx) => {
         // Check if seat exists
@@ -137,7 +121,7 @@ export class ReservationRepository implements Repository<Reservation> {
     }
   }
 
-  async update(
+  override async update(
     id: Reservation["id"],
     value: Create<Reservation>,
   ): Promise<Reservation> {

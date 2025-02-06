@@ -1,12 +1,12 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { movieRepository, showRepositoryObj } from "../db/repositories/index.ts";
+import { movieRepositoryObj, showRepositoryObj } from "../db/repositories/index.ts";
 import { Movie } from "../db/models/movies.ts";
 import { TMDBService } from "../services/tmdbService.ts";
 
 export class MovieController implements Controller<Movie> {
   async getAll(ctx: Context): Promise<void> {
-    const movies = await movieRepository.findAll();
+    const movies = await movieRepositoryObj.findAll();
     ctx.response.body = movies;
   }
 
@@ -17,7 +17,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const movie = await movieRepository.find(Number(id));
+    const movie = await movieRepositoryObj.find(Number(id));
     if (movie) {
       ctx.response.body = movie;
     } else {
@@ -51,7 +51,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const movie = await movieRepository.create(contextMovie);
+    const movie = await movieRepositoryObj.create(contextMovie);
     ctx.response.status = 201;
     ctx.response.body = movie;
   }
@@ -87,7 +87,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const movie = await movieRepository.update(Number(id), contextMovie);
+    const movie = await movieRepositoryObj.update(Number(id), contextMovie);
     ctx.response.body = movie;
   }
   async delete(ctx: RouterContext<"/movies/:id">): Promise<void> {
@@ -97,7 +97,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await movieRepository.delete(Number(id));
+    await movieRepositoryObj.delete(Number(id));
     ctx.response.status = 204;
   }
 
@@ -135,7 +135,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const movie = await movieRepository.find(Number(id));
+    const movie = await movieRepositoryObj.find(Number(id));
     if (movie) {
       ctx.response.body = movie.genres || [];
     } else {
@@ -166,14 +166,14 @@ export class MovieController implements Controller<Movie> {
       return;
     }
 
-    const movie = await movieRepository.find(Number(id));
+    const movie = await movieRepositoryObj.find(Number(id));
     if (!movie) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Movie not found" };
       return;
     }
 
-    const updatedMovie = await movieRepository.update(Number(id), { ...movie, genres });
+    const updatedMovie = await movieRepositoryObj.update(Number(id), { ...movie, genres });
     ctx.response.body = updatedMovie;
   }
   async getShowsByMovieId(ctx: Context): Promise<void> {
@@ -183,7 +183,7 @@ export class MovieController implements Controller<Movie> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const movie = await movieRepository.find(Number(id));
+    const movie = await movieRepositoryObj.find(Number(id));
     if (movie) {
       const shows = await showRepositoryObj.findByMovieId(Number(id));
       ctx.response.body = shows;

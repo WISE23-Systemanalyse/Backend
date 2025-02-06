@@ -1,5 +1,4 @@
 import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
 import { bookings, Booking } from "../models/bookings.ts";
 import { Show } from "../models/shows.ts";
 import { eq } from "drizzle-orm";
@@ -7,43 +6,29 @@ import { users } from "../models/users.ts";
 import { shows } from "../models/shows.ts";
 import { seats } from "../models/seats.ts";
 import { Payment, payments } from "../models/payments.ts";
+import { BaseRepository } from "./baseRepository.ts";
 
 
-export class BookingRepository implements Repository<Booking> {
-    async findAll(): Promise<Booking[]> {
-        const allBookings = await db.select().from(bookings);
-        return allBookings;
-    }
-    async find(id: Booking['id']): Promise< Booking | null> {
-        const result = await db.query.bookings.findFirst({
-            where: eq(bookings.id, id),
-          });
-          return result ?? null;
-    }
-    async delete(id: Booking['id']): Promise<void> {
-        await db.delete(bookings).where(eq(bookings.id, id));
-    }
-    async create(value: Create<Booking>): Promise<Booking> {
-      const [booking] = await db.insert(bookings).values(value).returning();
-      return booking;
-    }
-    async update(id: Booking['id'], value: Create<Booking>): Promise<Booking> {
-        const [updatedBooking] = await db.update(bookings).set(value).where(eq(bookings.id, id)).returning();
-        return updatedBooking;
-    }
+export class BookingRepository extends BaseRepository<Booking> {
+
+    constructor() {
+        super(bookings);
+      }
+    
     async getBookingsByShowId(showId: Show['id']): Promise<Booking[]> {
             const showBookings = await db.select().from(bookings).where(eq(bookings["show_id"], showId));
             return showBookings ?? [];
     }
     async getBookingsByUserId(userId: Booking['user_id']): Promise<Booking[]> {
-        const userBookings = await db.select().from(bookings).where(eq(bookings["user_id"], userId));
+        if (!userId) return [];
+        const userBookings = await db.select().from(bookings).where(eq(bookings.user_id, userId));
         return userBookings ?? [];
     }
     async getBookingsByPaymentId(paymentId: Payment['id']): Promise<Booking[]> {
         const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
         return paymentBookings ?? [];
     }
-    async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, base_price: number | null, row_number: number | null, seat_number: number | null, category_id: number | null, amount: number | null, payment_time: Date | null, tax: number | null, payment_method: string | null, payment_status: string | null, payment_details: string | null, time_of_payment: Date | null }[]> {
+    async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string | null, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, base_price: number | null, row_number: number | null, seat_number: number | null, category_id: number | null, amount: number | null, payment_time: Date | null, tax: number | null, payment_method: string | null, payment_status: string | null, time_of_payment: Date | null }[]> {
         const booking = await db.select({
             // Booking Details
             booking_id: bookings.id,
@@ -77,7 +62,6 @@ export class BookingRepository implements Repository<Booking> {
             tax: payments.tax,
             payment_method: payments.payment_method,
             payment_status: payments.payment_status,
-            payment_details: payments.payment_details,
             time_of_payment: payments.time_of_payment
           })
           .from(bookings)
@@ -91,3 +75,5 @@ export class BookingRepository implements Repository<Booking> {
 }
 
 export const bookingRepositoryObj = new BookingRepository();
+
+

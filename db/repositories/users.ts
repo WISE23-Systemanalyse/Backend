@@ -1,14 +1,17 @@
 import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
+import { Create } from "../../interfaces/repository.ts";
 import { users, User } from "../models/users.ts";
 import { eq } from "drizzle-orm";
+import { BaseRepository } from "./baseRepository.ts";
 
-
-export class UserRepository implements Repository<User> {
-    async findAll(): Promise<any[]> {
-        const allUsers = await db.select().from(users);
-        const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
-        return usersWithoutPassword;
+export class UserRepository extends BaseRepository<User> {
+    constructor() {
+        super(users);
+    }
+    override async findAll(): Promise<User[]> {
+      const allUsers = await db.select().from(users);
+      const usersWithoutPassword = allUsers.map(({ password, ...user }) => user);
+      return usersWithoutPassword;
     }
     async find(id: User['id']): Promise< any | null> {
         const result = await db.query.users.findFirst({

@@ -2,8 +2,6 @@ import { db } from "../db.ts";
 import { Create, Repository } from "../../interfaces/repository.ts";
 import { seats, Seat } from "../models/seats.ts";
 import { eq } from "drizzle-orm";
-import { ReservationRepositoryObj } from "./reservations.ts";
-import { bookingRepositoryObj } from "./bookings.ts";
 import { Hall } from "../models/halls.ts";
 export class SeatRepository implements Repository<Seat> {
     async findAll(): Promise<Seat[]> {

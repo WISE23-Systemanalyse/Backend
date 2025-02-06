@@ -1,12 +1,12 @@
 import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
-import { hallRepository } from "../db/repositories/halls.ts";
+import { hallRepositoryObj } from "../db/repositories/halls.ts";
 import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { Hall } from "../db/models/halls.ts";
 
 export class HallController implements Controller<Hall> {
   async getAll(ctx: Context): Promise<void> {
-    const halls = await hallRepository.findAll();
+    const halls = await hallRepositoryObj.findAll();
     ctx.response.body = halls;
   }
 
@@ -17,7 +17,7 @@ export class HallController implements Controller<Hall> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const hall = await hallRepository.find(id);
+    const hall = await hallRepositoryObj.find(id);
     if (hall) {
       ctx.response.body = hall;
     } else {
@@ -33,7 +33,7 @@ export class HallController implements Controller<Hall> {
       ctx.response.body = { message: "HallId parameter is required" };
       return;
     }
-    const Hall = hallRepository.find(id);
+    const Hall = hallRepositoryObj.find(id);
     if (!Hall) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Hall not found" };
@@ -61,7 +61,7 @@ export class HallController implements Controller<Hall> {
       return;
     }
 
-    const hall = await hallRepository.create(contextHall);
+    const hall = await hallRepositoryObj.create(contextHall);
     ctx.response.status = 201;
     ctx.response.body = hall;
   }
@@ -89,7 +89,7 @@ export class HallController implements Controller<Hall> {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const hall = await hallRepository.update(id, contextHall);
+    const hall = await hallRepositoryObj.update(id, contextHall);
     if (hall) {
       ctx.response.body = hall;
     } else {
@@ -105,9 +105,9 @@ export class HallController implements Controller<Hall> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const hall = await hallRepository.find(id);
+    const hall = await hallRepositoryObj.find(id);
     if (hall) {
-      await hallRepository.delete(id);
+      await hallRepositoryObj.delete(id);
       ctx.response.status = 204;
     } else {
       ctx.response.status = 404;
