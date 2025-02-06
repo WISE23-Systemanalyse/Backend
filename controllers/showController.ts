@@ -23,7 +23,7 @@ export class ShowController {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const show = await showRepositoryObj.find(Number(id));
+    const show = await showRepositoryObj.find(id);
     if (show) {
       ctx.response.body = show;
     } else {
@@ -39,7 +39,7 @@ export class ShowController {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const show = await showRepositoryObj.findOneWithDetails(Number(id));
+    const show = await showRepositoryObj.findOneWithDetails(id);
     if (show) {
       ctx.response.body = show;
     } else {
@@ -50,11 +50,6 @@ export class ShowController {
 
   async getShowsByHallId(ctx: RouterContext<"/shows/hall/:id">): Promise<void> {
     const { id } = ctx.params;
-    if (!id) {
-      ctx.response.status = 400;
-      ctx.response.body = { message: "Id parameter is required" };
-      return;
-    }
     const shows = await showRepositoryObj.findByHallId(Number(id));
     ctx.response.body = shows;
   }
@@ -87,13 +82,13 @@ export class ShowController {
       const show = await showRepositoryObj.create(newShow);
       ctx.response.status = 201;
       ctx.response.body = show;
-    } catch (error:any) {
+    } catch (error) {
       ctx.response.status = 500;
       ctx.response.body = { message: error.message };
     }
   }
 
-  async update(ctx: RouterContext<"/shows/:id">): Promise<void> {
+  async update(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -121,16 +116,16 @@ export class ShowController {
     }
   }
 
-  async delete(ctx: RouterContext<"/shows/:id">): Promise<void> {
+  async delete(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const show = await showRepositoryObj.find(Number(id));
+    const show = await showRepositoryObj.find(id);
     if (show) {
-      await showRepositoryObj.delete(Number(id));
+      await showRepositoryObj.delete(id);
       ctx.response.status = 204;
     } else {
       ctx.response.status = 404;
@@ -138,16 +133,16 @@ export class ShowController {
     }
   }
 
-  async getBookingsByShowId(ctx: RouterContext<"/shows/:id/bookings">): Promise<void> {
+  async getBookingsByShowId(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const show = await showRepositoryObj.find(Number(id));
+    const show = await showRepositoryObj.find(id);
     if (show) {
-      const bookings = await bookingRepositoryObj.getBookingsByShowId(Number(id));
+      const bookings = await bookingRepositoryObj.getBookingsByShowId(id);
       ctx.response.body = bookings;
     } else {
       ctx.response.status = 404;
@@ -155,7 +150,7 @@ export class ShowController {
     }
   }
 
-  async getSeatsWithStatus(ctx: RouterContext<"/shows/:id/seats">): Promise<void> {
+  async getSeatsWithStatus(ctx: Context): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -163,7 +158,7 @@ export class ShowController {
       return;
     }
 
-    const show = await showRepositoryObj.find(Number(id));
+    const show = await showRepositoryObj.find(id);
     if (!show) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Show not found" };
@@ -171,9 +166,9 @@ export class ShowController {
     }
 
     const allSeats = await seatRepositoryObj.findByHallId(show.hall_id);
-    const bookedSeats = await bookingRepositoryObj.getBookingsByShowId(Number(id));
+    const bookedSeats = await bookingRepositoryObj.getBookingsByShowId(id);
     const reservedSeats = await reservationServiceObj.getReservationsByShowId(
-      Number(id),
+      id,
     );
 
     const seatsWithStatus = allSeats.map((seat) => ({
