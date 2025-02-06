@@ -29,7 +29,6 @@ Deno.test("AccountController Tests", async (t) => {
   const controller = new AccountController();
 
 
-
   userAuthServiceObj.register = mockUserAuthService.register;
   userAuthServiceObj.verifyUser = mockUserAuthService.verifyUser;
   userAuthServiceObj.login = mockUserAuthService.login;
