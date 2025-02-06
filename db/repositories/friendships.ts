@@ -1,4 +1,3 @@
-import { db } from "../db.ts";
 import { friendships, Friendship } from "../models/friendships.ts";
 import { eq, and, or } from "drizzle-orm";
 import { BaseRepository } from "./baseRepository.ts";
@@ -9,7 +8,7 @@ export class FriendshipRepository extends BaseRepository<Friendship> {
     }
     // Zusätzliche hilfreiche Methoden für Freundschaften
     async findByUsers(user1Id: number, user2Id: number): Promise<Friendship | null> {
-        const result = await db.query.friendships.findFirst({
+        const result = await this.db.query.friendships.findFirst({
             where: and(
                 eq(friendships.user1Id, user1Id.toString()),
                 eq(friendships.user2Id, user2Id.toString())
@@ -19,7 +18,7 @@ export class FriendshipRepository extends BaseRepository<Friendship> {
     }
 
     async findFriendshipsByUserId(userId: number): Promise<Friendship[]> {
-        return await db.select()
+        return await this.db.select()
             .from(friendships)
             .where(
                 or(

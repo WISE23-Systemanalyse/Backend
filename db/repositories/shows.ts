@@ -1,4 +1,3 @@
-import { db } from "../db.ts";
 import { Create } from "../../interfaces/repository.ts";
 import { Show, shows, ShowWithDetails} from "../models/shows.ts";
 import { movies } from "../models/movies.ts";
@@ -17,7 +16,7 @@ export class ShowRepository extends  BaseRepository<Show> {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const allShows = await db
+        const allShows = await this.db
             .select({
                 id: shows.id,
                 movie_id: shows.movie_id,
@@ -45,7 +44,7 @@ export class ShowRepository extends  BaseRepository<Show> {
   }
  
   async findOneWithDetails(id: Show["id"]): Promise<ShowWithDetails | null> {
-    const result = await db
+    const result = await this.db
         .select({
             id: shows.id,
             movie_id: shows.movie_id,
@@ -69,7 +68,7 @@ export class ShowRepository extends  BaseRepository<Show> {
   override async update(id: Show["id"], value: Create<Show>): Promise<Show> {
   
     // Direkt das Datum-Objekt erstellen
-    const [updatedShow] = await db.update(shows)
+    const [updatedShow] = await this.db.update(shows)
         .set({
             movie_id: value.movie_id,
             hall_id: value.hall_id,
@@ -81,7 +80,7 @@ export class ShowRepository extends  BaseRepository<Show> {
     return updatedShow;
   }
   async findByMovieId(movieId: Show["movie_id"]): Promise<{ show_id: number, hall_id: number, hall_name: string | null, start_time: Date }[]> {
-    const result = await db
+    const result = await this.db
       .select({
         show_id: shows.id,
         hall_id: shows.hall_id,
@@ -97,7 +96,7 @@ export class ShowRepository extends  BaseRepository<Show> {
     return result;
   }
   async findByHallId(hallId: Show["hall_id"]): Promise<{ show_id: number, movie_id: number, hall_id: number, start_time: Date, title: string | null, description: string | null, image_url: string | null }[]> {
-    const result = await db
+    const result = await this.db
       .select({
         show_id: shows.id,
         movie_id: shows.movie_id,

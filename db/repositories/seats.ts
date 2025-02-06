@@ -1,4 +1,3 @@
-import { db } from "../db.ts";
 import { seats, Seat } from "../models/seats.ts";
 import { eq } from "drizzle-orm";
 import { Hall } from "../models/halls.ts";
@@ -9,7 +8,7 @@ export class SeatRepository extends BaseRepository<Seat> {
         super(seats);
       }
     async findByHallId(hallId: Hall["id"]): Promise<Seat[]> {
-        const result = await db.select()
+        const result = await this.db.select()
             .from(seats)
             .where(eq(seats.hall_id, Number(hallId)))
             .orderBy(seats.row_number, seats.seat_number);

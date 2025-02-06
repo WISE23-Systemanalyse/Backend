@@ -1,4 +1,4 @@
-import { db } from "../db.ts";
+
 import { bookings, Booking } from "../models/bookings.ts";
 import { Show } from "../models/shows.ts";
 import { eq } from "drizzle-orm";
@@ -10,26 +10,24 @@ import { BaseRepository } from "./baseRepository.ts";
 
 
 export class BookingRepository extends BaseRepository<Booking> {
-
     constructor() {
         super(bookings);
       }
-    
     async getBookingsByShowId(showId: Show['id']): Promise<Booking[]> {
-            const showBookings = await db.select().from(bookings).where(eq(bookings["show_id"], showId));
+            const showBookings = await this.db.select().from(bookings).where(eq(bookings["show_id"], showId)) as Booking[];
             return showBookings ?? [];
     }
     async getBookingsByUserId(userId: Booking['user_id']): Promise<Booking[]> {
         if (!userId) return [];
-        const userBookings = await db.select().from(bookings).where(eq(bookings.user_id, userId));
+        const userBookings = await this.db.select().from(bookings).where(eq(bookings.user_id, userId)) as Booking[];
         return userBookings ?? [];
     }
     async getBookingsByPaymentId(paymentId: Payment['id']): Promise<Booking[]> {
-        const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
+        const paymentBookings = await this.db.select().from(bookings).where(eq(bookings["payment_id"], paymentId)) as Booking[];
         return paymentBookings ?? [];
     }
     async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string | null, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, base_price: number | null, row_number: number | null, seat_number: number | null, category_id: number | null, amount: number | null, payment_time: Date | null, tax: number | null, payment_method: string | null, payment_status: string | null, time_of_payment: Date | null }[]> {
-        const booking = await db.select({
+        const booking = await this.db.select({
             // Booking Details
             booking_id: bookings.id,
             user_id: bookings.user_id,

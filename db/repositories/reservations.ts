@@ -1,5 +1,5 @@
-import { db } from "../db.ts";
-import { Create, Repository } from "../../interfaces/repository.ts";
+
+import { Create } from "../../interfaces/repository.ts";
 import { Reservation, reservations } from "../models/reservations.ts";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { shows } from "../models/shows.ts";
@@ -19,11 +19,11 @@ const RESERVATION_TIME = 10*60*1000 // 10 minute in milliseconds
 export class ReservationRepository extends BaseRepository<Reservation> {
  
   constructor() {
-    super(shows);
+    super(reservations);
   }
 
   async findByShowId(showId: Reservation["show_id"]): Promise<Reservation[]> {
-    const result = await db.select()
+    const result = await this.db.select()
       .from(reservations)
       .where(eq(reservations.show_id, showId));
     return result;
@@ -31,7 +31,7 @@ export class ReservationRepository extends BaseRepository<Reservation> {
 
   override async create(value: Create<Reservation>): Promise<Reservation> {
     try {
-      return await db.transaction(async (tx) => {
+      return await this.db.transaction(async (tx) => {
         // Check if seat exists
         const seat = await tx.query.seats.findFirst({
           where: eq(seats.id, value.seat_id),
@@ -132,7 +132,7 @@ export class ReservationRepository extends BaseRepository<Reservation> {
     id: Reservation["id"],
     value: Create<Reservation>,
   ): Promise<Reservation> {
-    const [updatedReservation] = await db
+    const [updatedReservation] = await this.db
       .update(reservations)
       .set(value)
       .where(eq(reservations.id, id))
