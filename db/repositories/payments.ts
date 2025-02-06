@@ -29,4 +29,4 @@ export class PaymentRepository implements Repository<Payment> {
   }
 }
 
-export const paymentRepository = new PaymentRepository();
+export const paymentRepositoryObj = new PaymentRepository();

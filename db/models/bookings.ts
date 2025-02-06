@@ -6,9 +6,10 @@ import { payments } from "./payments.ts";
 
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey().unique().notNull(),
-  user_id: varchar("user_id").notNull().references(() => users.id, {
+  user_id: varchar("user_id").references(() => users.id, {
     onDelete: "cascade", // Löscht Buchungen, wenn der User gelöscht wird
   }),
+  email: varchar("email"),
   show_id: integer("show_id").notNull().references(() => shows.id, {
     onDelete: "cascade", 
   }),

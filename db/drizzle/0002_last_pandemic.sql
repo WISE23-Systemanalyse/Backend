@@ -1,0 +1,1 @@
+ALTER TABLE "payments" ALTER COLUMN "payment_details" DROP NOT NULL;--> statement-breakpoint
