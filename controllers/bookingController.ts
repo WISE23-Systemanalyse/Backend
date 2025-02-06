@@ -1,22 +1,22 @@
-import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { Controller } from "../interfaces/controller.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { Booking } from "../db/models/bookings.ts";
 
 export class BookingController implements Controller<Booking> {
-  async getAll(ctx: Context): Promise<void> {
+  async getAll(ctx: RouterContext<"/bookings">): Promise<void> {
     const bookings = await bookingRepositoryObj.findAll();
     ctx.response.body = bookings;
   }
 
-  async getOne(ctx: Context): Promise<void> {
+  async getOne(ctx: RouterContext<"/bookings/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const booking = await bookingRepositoryObj.find(id);
+    const booking = await bookingRepositoryObj.find(Number(id));
     if (booking) {
       ctx.response.body = booking;
     } else {
@@ -25,7 +25,7 @@ export class BookingController implements Controller<Booking> {
     }
   }
 
-  async create(ctx: Context): Promise<void> {
+  async create(ctx: RouterContext<"/bookings">): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -46,7 +46,7 @@ export class BookingController implements Controller<Booking> {
     }
   }
 
-  async update(ctx: Context): Promise<void> {
+  async update(ctx: RouterContext<"/bookings/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -72,21 +72,21 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = { message: "Invalid JSON" };
         return;
         }
-    const booking = await bookingRepositoryObj.update(id, contextBooking);
+    const booking = await bookingRepositoryObj.update(Number(id), contextBooking);
     ctx.response.status = 200;
     ctx.response.body = booking;
     }
 
-    async delete(ctx: Context): Promise<void> {
+    async delete(ctx: RouterContext<"/bookings/:id">): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        const booking = await bookingRepositoryObj.find(id);
+        const booking = await bookingRepositoryObj.find(Number(id));
         if (booking) {
-            await bookingRepositoryObj.delete(id);
+            await bookingRepositoryObj.delete(Number(id));
             ctx.response.status = 204;
         } else {
             ctx.response.status = 404;
@@ -94,18 +94,18 @@ export class BookingController implements Controller<Booking> {
         }
     }
 
-    async getBookingsByShowId(ctx: Context): Promise<void> {
+    async getBookingsByShowId(ctx: RouterContext<"/bookings/show/:id">): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
-        const bookings = await bookingRepositoryObj.getBookingsByShowId(id);
+        const bookings = await bookingRepositoryObj.getBookingsByShowId(Number(id));
         ctx.response.body = bookings;
     }
 
-    async getBookingsByUserId(ctx: Context): Promise<void> {
+    async getBookingsByUserId(ctx: RouterContext<"/bookings/user/:id">): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
@@ -116,11 +116,11 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = bookings;
     }
 
-    async getAllBookingDetails(ctx: Context): Promise<void> {
+    async getAllBookingDetails(ctx: RouterContext<"/bookings/details">): Promise<void> {
         const bookingDetails = await bookingRepositoryObj.getAllBookingDetails;
         ctx.response.body = bookingDetails;
     }
-    async getByPaymentId(ctx: Context): Promise<void> {
+    async getByPaymentId(ctx: RouterContext<"/bookings/payment/:paymentId">): Promise<void> {
       const { paymentId } = ctx.params;
       
       if (!paymentId) {
@@ -130,7 +130,7 @@ export class BookingController implements Controller<Booking> {
       }
 
       try {
-        const bookings = await bookingRepositoryObj.getBookingsByPaymentId(paymentId);
+        const bookings = await bookingRepositoryObj.getBookingsByPaymentId(Number(paymentId));
         
         if (bookings && bookings.length > 0) {
           ctx.response.body = bookings;
@@ -138,10 +138,10 @@ export class BookingController implements Controller<Booking> {
           ctx.response.status = 404;
           ctx.response.body = { message: "No bookings found for this payment" };
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching bookings:', error);
         ctx.response.status = 500;
-        ctx.response.body = { message: error.message };
+        ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
       }
     }
 }
