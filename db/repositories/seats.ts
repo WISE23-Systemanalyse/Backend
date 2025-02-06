@@ -16,9 +16,11 @@ export class SeatRepository extends BaseRepository<Seat> {
         
         return result;
     }
+
     async deleteByHallId(hallId: Hall["id"]): Promise<void> {
         await db.delete(seats).where(eq(seats.hall_id, Number(hallId)));
     }
+    
     
 }
 
