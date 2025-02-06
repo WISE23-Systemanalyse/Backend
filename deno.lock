@@ -469,6 +469,7 @@
     }
   },
   "redirects": {
+    "https://deno.land/std/assert/mod.ts": "https://deno.land/std@0.224.0/assert/mod.ts",
     "https://deno.land/x/bcrypt/mod.ts": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
     "https://deno.land/x/oak/mod.ts": "https://deno.land/x/oak@v17.1.3/mod.ts",
     "https://esm.sh/@clerk/backend": "https://esm.sh/@clerk/backend@1.23.4",
