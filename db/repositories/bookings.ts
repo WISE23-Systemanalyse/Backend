@@ -43,7 +43,7 @@ export class BookingRepository implements Repository<Booking> {
         const paymentBookings = await db.select().from(bookings).where(eq(bookings["payment_id"], paymentId));
         return paymentBookings ?? [];
     }
-    async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, base_price: number | null, row_number: number | null, seat_number: number | null, category_id: number | null, amount: number | null, payment_time: Date | null, tax: number | null, payment_method: string | null, payment_status: string | null, payment_details: string | null, time_of_payment: Date | null }[]> {
+    async getAllBookingDetails(): Promise<{ booking_id: number, user_id: string | null, show_id: number, seat_id: number, payment_id: number, booking_time: Date | null, email: string | null, first_name: string | null, last_name: string | null, user_name: string | null, image_url: string | null, movie_id: number | null, hall_id: number | null, start_time: Date | null, base_price: number | null, row_number: number | null, seat_number: number | null, category_id: number | null, amount: number | null, payment_time: Date | null, tax: number | null, payment_method: string | null, payment_status: string | null, time_of_payment: Date | null }[]> {
         const booking = await db.select({
             // Booking Details
             booking_id: bookings.id,
@@ -77,7 +77,6 @@ export class BookingRepository implements Repository<Booking> {
             tax: payments.tax,
             payment_method: payments.payment_method,
             payment_status: payments.payment_status,
-            payment_details: payments.payment_details,
             time_of_payment: payments.time_of_payment
           })
           .from(bookings)
