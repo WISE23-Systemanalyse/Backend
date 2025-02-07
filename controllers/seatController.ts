@@ -1,12 +1,14 @@
-import { RouterContext } from "https://deno.land/x/oak@v17.1.4/mod.ts";
+import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 
 import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
 import { reservationServiceObj } from "../services/reservationService.ts";
 
 export class SeatController {
+  constructor(private repository = seatRepositoryObj) {}
+
   async getAll(ctx: RouterContext<string>): Promise<void> {
-    const seats = await seatRepositoryObj.findAll();
+    const seats = await this.repository.findAll();
     ctx.response.body = seats;
   }
 
@@ -17,7 +19,7 @@ export class SeatController {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const seat = await seatRepositoryObj.find(Number(id));
+    const seat = await this.repository.find(Number(id));
     if (seat) {
       ctx.response.body = seat;
     } else {
@@ -46,7 +48,7 @@ export class SeatController {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const seat = await seatRepositoryObj.create(contextSeat);
+    const seat = await this.repository.create(contextSeat);
     ctx.response.status = 201;
     ctx.response.body = seat;
   }
@@ -77,7 +79,7 @@ export class SeatController {
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const seat = await seatRepositoryObj.update(Number(id), contextSeat);
+    const seat = await this.repository.update(Number(id), contextSeat);
     ctx.response.status = 200;
     ctx.response.body = seat;
   }
@@ -88,11 +90,11 @@ export class SeatController {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await seatRepositoryObj.delete(Number(id));
+    await this.repository.delete(Number(id));
     ctx.response.status = 204;
   }
 
-  async bulkCreate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkCreate(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -109,7 +111,7 @@ export class SeatController {
 
     try {
       const createdSeats = await Promise.all(
-        seats.map((seat) => seatRepositoryObj.create(seat)),
+        seats.map((seat) => this.repository.create(seat)),
       );
       ctx.response.status = 201;
       ctx.response.body = createdSeats;
@@ -119,7 +121,7 @@ export class SeatController {
     }
   }
 
-  async bulkUpdate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkUpdate(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -136,7 +138,7 @@ export class SeatController {
 
     try {
       const updatedSeats = await Promise.all(
-        seats.map((seat) => seatRepositoryObj.update(seat.id, seat)),
+        seats.map((seat) => this.repository.update(seat.id, seat)),
       );
       ctx.response.body = updatedSeats;
     } catch (error:any) {
@@ -145,7 +147,7 @@ export class SeatController {
     }
   }
 
-  async bulkDelete(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkDelete(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -163,7 +165,7 @@ export class SeatController {
     }
 
     try {
-      await Promise.all(seatIds.map((id) => seatRepositoryObj.delete(id)));
+      await Promise.all(seatIds.map((id) => this.repository.delete(id)));
       ctx.response.status = 204;
     } catch (error:any  ) {
       ctx.response.status = 400;
@@ -171,9 +173,7 @@ export class SeatController {
     }
   }
 
-  async syncHallSeats(
-    ctx: RouterContext<"/seats/halls/:hallId/sync">,
-  ): Promise<void> {
+  async syncHallSeats(ctx: RouterContext<string>): Promise<void> {
     const { hallId } = ctx.params;
     if (!hallId) {
       ctx.response.status = 400;
@@ -197,14 +197,14 @@ export class SeatController {
 
     try {
       // Lösche alle existierenden Sitze des Saals
-      await seatRepositoryObj.deleteByHallId(Number(hallId));
+      await this.repository.deleteByHallId(Number(hallId));
 
       // Erstelle die neuen Sitze
       const createdSeats = await Promise.all(
         newSeats.map((seat) => ({
           ...seat,
           hall_id: Number(hallId),
-        })).map((seat) => seatRepositoryObj.create(seat)),
+        })).map((seat) => this.repository.create(seat)),
       );
 
       ctx.response.status = 201;

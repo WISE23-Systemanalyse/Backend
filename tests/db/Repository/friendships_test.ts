@@ -1,7 +1,6 @@
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { friendshipRepositoryObj } from "../../db/repositories/friendships.ts";
-import { db } from "../../db/db.ts";
-import { eq } from "drizzle-orm";
+import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { friendshipRepositoryObj } from "../../../db/repositories/friendships.ts";
+import { db } from "../../../db/db.ts";
 
 // Mock für die Datenbank-Queries
 const mockFriendship = {
