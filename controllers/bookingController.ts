@@ -16,6 +16,7 @@ export class BookingController {
       return;
     }
     const booking = await bookingRepositoryObj.find(Number(id));
+    const booking = await bookingRepositoryObj.find(Number(id));
     if (booking) {
       ctx.response.body = booking;
     } else {
@@ -72,6 +73,7 @@ export class BookingController {
         return;
         }
     const booking = await bookingRepositoryObj.update(Number(id), contextBooking);
+    const booking = await bookingRepositoryObj.update(Number(id), contextBooking);
     ctx.response.status = 200;
     ctx.response.body = booking;
     }
@@ -84,7 +86,9 @@ export class BookingController {
             return;
         }
         const booking = await bookingRepositoryObj.find(Number(id));
+        const booking = await bookingRepositoryObj.find(Number(id));
         if (booking) {
+            await bookingRepositoryObj.delete(Number(id));
             await bookingRepositoryObj.delete(Number(id));
             ctx.response.status = 204;
         } else {
@@ -100,6 +104,7 @@ export class BookingController {
             ctx.response.body = { message: "Id parameter is required" };
             return;
         }
+        const bookings = await bookingRepositoryObj.getBookingsByShowId(Number(id));
         const bookings = await bookingRepositoryObj.getBookingsByShowId(Number(id));
         ctx.response.body = bookings;
     }
@@ -130,6 +135,7 @@ export class BookingController {
 
       try {
         const bookings = await bookingRepositoryObj.getBookingsByPaymentId(Number(paymentId));
+        const bookings = await bookingRepositoryObj.getBookingsByPaymentId(Number(paymentId));
         
         if (bookings && bookings.length > 0) {
           ctx.response.body = bookings;
@@ -138,8 +144,10 @@ export class BookingController {
           ctx.response.body = { message: "No bookings found for this payment" };
         }
       } catch (error: unknown) {
+      } catch (error: unknown) {
         console.error('Error fetching bookings:', error);
         ctx.response.status = 500;
+        ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
         ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
       }
     }
