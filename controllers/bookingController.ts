@@ -1,15 +1,14 @@
 import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { Booking } from "../db/models/bookings.ts";
 
-export class BookingController implements Controller<Booking> {
-  async getAll(ctx: RouterContext<"/bookings">): Promise<void> {
+export class BookingController {
+  async getAll(ctx: RouterContext<string>): Promise<void> {
     const bookings = await bookingRepositoryObj.findAll();
     ctx.response.body = bookings;
   }
 
-  async getOne(ctx: RouterContext<"/bookings/:id">): Promise<void> {
+  async getOne(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -25,7 +24,7 @@ export class BookingController implements Controller<Booking> {
     }
   }
 
-  async create(ctx: RouterContext<"/bookings">): Promise<void> {
+  async create(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -46,7 +45,7 @@ export class BookingController implements Controller<Booking> {
     }
   }
 
-  async update(ctx: RouterContext<"/bookings/:id">): Promise<void> {
+  async update(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -77,7 +76,7 @@ export class BookingController implements Controller<Booking> {
     ctx.response.body = booking;
     }
 
-    async delete(ctx: RouterContext<"/bookings/:id">): Promise<void> {
+    async delete(ctx: RouterContext<string>): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
@@ -94,7 +93,7 @@ export class BookingController implements Controller<Booking> {
         }
     }
 
-    async getBookingsByShowId(ctx: RouterContext<"/bookings/show/:id">): Promise<void> {
+    async getBookingsByShowId(ctx: RouterContext<string>): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
@@ -105,7 +104,7 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = bookings;
     }
 
-    async getBookingsByUserId(ctx: RouterContext<"/bookings/user/:id">): Promise<void> {
+    async getBookingsByUserId(ctx: RouterContext<string>): Promise<void> {
         const { id } = ctx.params;
         if (!id) {
             ctx.response.status = 400;
@@ -116,11 +115,11 @@ export class BookingController implements Controller<Booking> {
         ctx.response.body = bookings;
     }
 
-    async getAllBookingDetails(ctx: RouterContext<"/bookings/details">): Promise<void> {
+    async getAllBookingDetails(ctx: RouterContext<string>): Promise<void> {
         const bookingDetails = await bookingRepositoryObj.getAllBookingDetails;
         ctx.response.body = bookingDetails;
     }
-    async getByPaymentId(ctx: RouterContext<"/bookings/payment/:paymentId">): Promise<void> {
+    async getByPaymentId(ctx: RouterContext<string>): Promise<void> {
       const { paymentId } = ctx.params;
       
       if (!paymentId) {

@@ -6,7 +6,7 @@ import { showControllerObj } from "./showController.ts";
 import { hallController } from "./hallController.ts";
 import { accountController } from "./accountController.ts";
 import { paymentController } from "./paymentController.ts";
-import { seatController } from "./seatController.ts";
+import { seatControllerObj } from "./seatController.ts";
 import { newsletterController } from "./newsletterController.ts";
 import { contactController } from "./contactController.ts";
 import { friendshipController } from "./friendshipController.ts";
@@ -18,7 +18,7 @@ export {
   movieController,
   newsletterController,
   paymentController,
-  seatController,
+  seatControllerObj,
   showControllerObj,
   statusController,
   userController,

@@ -1,23 +1,23 @@
-import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.4/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
+import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
+
 import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { Seat } from "../db/models/seats.ts";
 import { reservationServiceObj } from "../services/reservationService.ts";
 
-export class SeatController implements Controller<Seat> {
+export class SeatController {
   async getAll(ctx: RouterContext<string>): Promise<void> {
     const seats = await seatRepositoryObj.findAll();
     ctx.response.body = seats;
   }
 
-  async getOne(ctx: RouterContext<string>): Promise<void> {
+  async getOne(ctx: RouterContext<"/seats/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const seat = await seatRepositoryObj.find(id);
+    const seat = await seatRepositoryObj.find(Number(id));
     if (seat) {
       ctx.response.body = seat;
     } else {
@@ -41,7 +41,7 @@ export class SeatController implements Controller<Seat> {
         ctx.response.body = { message: "Row, number, hallId and categoryId are required" };
         return;
       }
-    } catch (e) {
+    } catch (e:any) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
@@ -58,13 +58,13 @@ export class SeatController implements Controller<Seat> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const value = await ctx.request.body();
+    const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-    const contextSeat: Seat = await value.value;
+    const contextSeat: Seat = await value.json();
     try {
       const { hall_id, row_number, seat_number } = contextSeat;
       if (!hall_id || !row_number || !seat_number) {
@@ -72,34 +72,34 @@ export class SeatController implements Controller<Seat> {
         ctx.response.body = { message: "Row, number and hallId are required" };
         return;
       }
-    } catch (e) {
+    } catch (e:any) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Invalid JSON" };
       return;
     }
-    const seat = await seatRepositoryObj.update(id, contextSeat);
+    const seat = await seatRepositoryObj.update(Number(id), contextSeat);
     ctx.response.status = 200;
     ctx.response.body = seat;
   }
-  async delete(ctx: Context): Promise<void> {
+  async delete(ctx: RouterContext<string>): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await seatRepositoryObj.delete(id);
+    await seatRepositoryObj.delete(Number(id));
     ctx.response.status = 204;
   }
 
-  async bulkCreate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkCreate(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Request body is required" };
       return;
     }
-
+  
     const seats = await value.json();
     if (!Array.isArray(seats)) {
       ctx.response.status = 400;
@@ -113,13 +113,13 @@ export class SeatController implements Controller<Seat> {
       );
       ctx.response.status = 201;
       ctx.response.body = createdSeats;
-    } catch (error) {
+    } catch (error:any) {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
   }
 
-  async bulkUpdate(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkUpdate(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -139,13 +139,13 @@ export class SeatController implements Controller<Seat> {
         seats.map((seat) => seatRepositoryObj.update(seat.id, seat)),
       );
       ctx.response.body = updatedSeats;
-    } catch (error) {
+    } catch (error:any) {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
   }
 
-  async bulkDelete(ctx: RouterContext<"/seats/bulk">): Promise<void> {
+  async bulkDelete(ctx: RouterContext<string>): Promise<void> {
     const value = await ctx.request.body;
     if (!value) {
       ctx.response.status = 400;
@@ -165,15 +165,13 @@ export class SeatController implements Controller<Seat> {
     try {
       await Promise.all(seatIds.map((id) => seatRepositoryObj.delete(id)));
       ctx.response.status = 204;
-    } catch (error) {
+    } catch (error:any  ) {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
   }
 
-  async syncHallSeats(
-    ctx: RouterContext<"/seats/halls/:hallId/sync">,
-  ): Promise<void> {
+  async syncHallSeats(ctx: RouterContext<string>): Promise<void> {
     const { hallId } = ctx.params;
     if (!hallId) {
       ctx.response.status = 400;
@@ -197,7 +195,7 @@ export class SeatController implements Controller<Seat> {
 
     try {
       // Lösche alle existierenden Sitze des Saals
-      await seatRepositoryObj.deleteByHallId(hallId);
+      await seatRepositoryObj.deleteByHallId(Number(hallId));
 
       // Erstelle die neuen Sitze
       const createdSeats = await Promise.all(
@@ -209,7 +207,7 @@ export class SeatController implements Controller<Seat> {
 
       ctx.response.status = 201;
       ctx.response.body = createdSeats;
-    } catch (error) {
+    } catch (error:any) {
       ctx.response.status = 400;
       ctx.response.body = { message: error.message };
     }
@@ -222,15 +220,16 @@ export class SeatController implements Controller<Seat> {
       return;
     }
     try {
-      const ReqeustObj: any = await ctx.request.body.json()
-      const response = await reservationServiceObj.create(ReqeustObj)
-      ctx.response.status = 201
-      ctx.response.body = { message: response};
-    } catch (e: unknown) {
-      ctx.response.status = e.status || 500;
-      ctx.response.body = { message: e.message || "Internal Server Error" };
+      const RequestObj = await ctx.request.body.json();
+      const response = await reservationServiceObj.create(RequestObj);
+      ctx.response.status = 201;
+      ctx.response.body = { message: response };
+    } catch (error:any) {
+      const err = error as Error;
+      ctx.response.status = (error as { status?: number }).status || 500;
+      ctx.response.body = { message: err.message || "Internal Server Error" };
     }
   }
 }
 
-export const seatController = new SeatController();
+export const seatControllerObj = new SeatController();
