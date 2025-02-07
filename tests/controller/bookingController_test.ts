@@ -126,4 +126,127 @@ Deno.test("BookingController Tests", async (t) => {
     assertEquals(ctx.response.status, 400);
     assertEquals(ctx.response.body, { message: "Payment ID is required" });
   });
+
+  await t.step("getOne - sollte 404 bei nicht gefundener Buchung zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    
+    // Mock für nicht gefundene Buchung
+    bookingRepositoryObj.find = async () => null;
+
+    await controller.getOne(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Booking not found" });
+  });
+
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("create - sollte 400 bei ungültigem JSON zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => {
+      throw new Error("Invalid JSON");
+    };
+
+    await controller.create(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Invalid JSON" });
+  });
+
+  await t.step("update - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = {}; // keine ID
+
+    await controller.update(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("update - sollte 400 bei fehlenden Pflichtfeldern zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "1" };
+    ctx.request.body.json = async () => ({
+      // Fehlende Pflichtfelder
+      id: 1
+    });
+
+    await controller.update(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "BookingId, showId and userId are required" });
+  });
+
+  await t.step("delete - sollte 404 bei nicht gefundener Buchung zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    
+    // Mock für nicht gefundene Buchung
+    bookingRepositoryObj.find = async () => null;
+
+    await controller.delete(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Booking not found" });
+  });
+
+  await t.step("getBookingsByShowId - sollte 400 bei fehlender Show-ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = {}; // keine ID
+
+    await controller.getBookingsByShowId(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("getBookingsByUserId - sollte 400 bei fehlender User-ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = {}; // keine ID
+
+    await controller.getBookingsByUserId(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("getByPaymentId - sollte 404 bei nicht gefundenen Buchungen zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { paymentId: "999" };
+    
+    // Mock für keine Buchungen
+    bookingRepositoryObj.getBookingsByPaymentId = async () => [];
+
+    await controller.getByPaymentId(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "No bookings found for this payment" });
+  });
+
+  await t.step("getByPaymentId - sollte 500 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { paymentId: "1" };
+    
+    // Mock für Datenbankfehler
+    bookingRepositoryObj.getBookingsByPaymentId = async () => {
+      throw new Error("Database connection failed");
+    };
+
+    await controller.getByPaymentId(ctx as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { message: "Database connection failed" });
+  });
 });

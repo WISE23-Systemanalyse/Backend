@@ -122,4 +122,118 @@ Deno.test("FriendshipController Tests", async (t) => {
     
     assertEquals(ctx.response.body, { exists: false });
   });
+
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body ist erforderlich" });
+  });
+
+  await t.step("create - sollte 400 bei ungültigem JSON zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => {
+      throw new Error("Invalid JSON format");
+    };
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { 
+      message: "Ungültiges JSON Format",
+      error: "Invalid JSON format"
+    });
+  });
+
+  await t.step("create - sollte 404 bei nicht existierendem Benutzer zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      user1Id: "999",
+      user2Id: "888"
+    });
+
+    // Mock für nicht gefundenen Benutzer
+    userRepositoryObj.find = async () => null;
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Einer oder beide Benutzer wurden nicht gefunden" });
+  });
+
+  await t.step("getFriendshipsByUserId - sollte 404 bei nicht existierendem Benutzer zurückgeben", async () => {
+    const ctx = createMockContext() as RouterContext<"/friendships/user/:userId">;
+    ctx.params = { userId: "999" };
+
+    // Mock für nicht gefundenen Benutzer
+    userRepositoryObj.find = async () => null;
+
+    await controller.getFriendshipsByUserId(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Benutzer nicht gefunden" });
+  });
+
+  await t.step("getFriendshipsByUserId - sollte 500 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext() as RouterContext<"/friendships/user/:userId">;
+    ctx.params = { userId: "1" };
+
+    // Mock für Datenbankfehler
+    userRepositoryObj.find = async () => ({ id: "1", email: "test@test.com" });
+    friendshipRepositoryObj.findFriendshipsByUserId = async () => {
+      throw new Error("Database connection error");
+    };
+
+    await controller.getFriendshipsByUserId(ctx);
+    
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { 
+      message: "Fehler beim Abrufen der Freundschaften",
+      error: "Database connection error"
+    });
+  });
+
+  await t.step("checkFriendship - sollte 400 bei fehlenden User IDs zurückgeben", async () => {
+    const ctx = createMockContext() as RouterContext<"/friendships/check">;
+    ctx.request.body.json = async () => ({
+      user1Id: "1"
+      // user2Id fehlt
+    });
+
+    await controller.checkFriendship(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Beide User IDs sind erforderlich" });
+  });
+
+  await t.step("create - sollte 400 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      user1Id: "1",
+      user2Id: "2"
+    });
+
+    // Mocks für erfolgreiche Benutzerprüfung
+    userRepositoryObj.find = async () => ({ id: "1", email: "test@test.com" });
+    friendshipRepositoryObj.findByUsers = async () => null;
+
+    // Mock für Datenbankfehler beim Erstellen
+    friendshipRepositoryObj.create = async () => {
+      throw new Error("Database error during creation");
+    };
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { 
+      message: "Fehler beim Erstellen der Freundschaft",
+      error: "Database error during creation"
+    });
+  });
 });

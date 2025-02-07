@@ -150,4 +150,108 @@ Deno.test("HallController Tests", async (t) => {
     assertEquals(ctx.response.status, 404);
     assertEquals(ctx.response.body, { message: "Hall not found" });
   });
+
+  await t.step("getOne - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getOne(ctx as RouterContext<"/halls/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx as RouterContext<"/halls">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("update - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext({ id: "1" });
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.update(ctx as RouterContext<"/halls/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("update - sollte 400 bei ungültigem JSON zurückgeben", async () => {
+    const ctx = createMockContext({ id: "1" });
+    ctx.request.body.json = async () => ({
+      // Fehlende Pflichtfelder
+      name: "Test Hall"
+      // seating_capacity fehlt
+    });
+
+    await controller.update(ctx as RouterContext<"/halls/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Invalid JSON" });
+  });
+
+  await t.step("update - sollte 404 bei nicht existierendem Saal zurückgeben", async () => {
+    const ctx = createMockContext({ id: "999" });
+    ctx.request.body.json = async () => ({
+      name: "Updated Hall",
+      seating_capacity: 300
+    });
+
+    // Mock für nicht gefundenen Saal
+    hallRepositoryObj.update = async () => null as unknown as Hall;
+
+    await controller.update(ctx as RouterContext<"/halls/:id">);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Hall not found" });
+  });
+
+  await t.step("getSeats - sollte 400 bei fehlender Hall-ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getSeats(ctx as RouterContext<"/halls/:id/seats">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "HallId parameter is required" });
+  });
+
+  await t.step("getSeats - sollte 404 bei nicht existierendem Saal zurückgeben", async () => {
+    const ctx = createMockContext({ id: "999" });
+    
+    // Mock für nicht gefundenen Saal
+    hallRepositoryObj.find = async () => null;
+
+    await controller.getSeats(ctx as RouterContext<"/halls/:id/seats">);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Hall not found" });
+  });
+
+  await t.step("delete - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.delete(ctx as RouterContext<"/halls/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("create - sollte 400 bei fehlenden Pflichtfeldern zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      // Beide Pflichtfelder fehlen
+    });
+
+    await controller.create(ctx as RouterContext<"/halls">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Invalid JSON" });
+  });
 });

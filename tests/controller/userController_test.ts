@@ -65,6 +65,14 @@ Deno.test("UserController Tests", async (t) => {
     assertEquals(ctx.response.body, { message: "User not found" });
   });
 
+  await t.step("getOne - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getOne(ctx as unknown as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
   await t.step("create - should create user successfully", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ({
@@ -90,6 +98,18 @@ Deno.test("UserController Tests", async (t) => {
     assertEquals(ctx.response.body, { message: "Email and id are required" });
   });
 
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx as unknown as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
 
   await t.step("delete - should delete user successfully", async () => {
     const ctx = createMockContext();
@@ -114,4 +134,75 @@ Deno.test("UserController Tests", async (t) => {
     assertEquals(ctx.response.status, 404);
     assertEquals(ctx.response.body, { message: "User not found" });
   });
+
+  await t.step("delete - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.delete(ctx as unknown as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  // Setup JWT test environment
+  await Deno.env.set("JWT_SECRET_KEY", "test-secret");
+
+  await t.step("update - sollte User nicht aktualisieren wenn nicht der richtige Token vorhanden ist", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "1" };
+    // Gültiger Test-Token mit ID "1"
+    ctx.request.headers.set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEifQ.tRLwlw9p8GPvZJhgKR-1kywbkhK-8hX1vXF6w3Vf5XY");
+    ctx.request.body.json = async () => ({
+      email: "updated@example.com"
+    });
+
+    // Mock für erfolgreiche User-Aktualisierung
+    userRepositoryObj.update = async (id, data) => ({
+      id,
+      ...data
+    });
+
+    await controller.update(ctx as unknown as RouterContext<string>);
+
+    console.log(ctx.response.body);
+    console.log(ctx.response.status);
+    
+    assertEquals(ctx.response.status, 404);
+  });
+
+  await t.step("update - sollte 401 bei fehlendem Authorization Header zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.update(ctx as unknown as RouterContext<string>);
+    
+    assertEquals(ctx.response.status, 401);
+    assertEquals(ctx.response.body, { message: "unauthenticated" });
+  });
+
+  await t.step("update - sollte 400 fehlendem Id parameter zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.headers.set("Authorization", "Bearer invalid-token");
+
+    await controller.update(ctx as unknown as RouterContext<string>);
+
+    console.log(ctx.response.body);
+    console.log(ctx.response.status);
+    
+    assertEquals(ctx.response.status, 400);
+  });
+
+  await t.step("update - sollte 400 bei nicht existierendem User zurückgeben", async () => {
+    const ctx = createMockContext();
+    // Token mit ID "999"
+    ctx.request.headers.set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijk5OSJ9.2NBpD1cHYRvrQQDpAYtqwHtrYYHj1YZI1JyB-tS2txQ");
+
+    // Mock für nicht gefundenen User
+    userRepositoryObj.find = async () => null;
+
+    await controller.update(ctx as unknown as RouterContext<string>);
+
+    console.log(ctx.response.body);
+    console.log(ctx.response.status);
+    
+    assertEquals(ctx.response.status, 400);
+  });
+
 });

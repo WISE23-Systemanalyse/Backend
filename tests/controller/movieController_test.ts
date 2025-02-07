@@ -157,4 +157,128 @@ Deno.test("MovieController Tests", async (t) => {
     assertEquals(ctx.response.status, 0);
     assertEquals(ctx.response.body, []);
   });
+
+  await t.step("getOne - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext() as RouterContext<"/movies/:id">;
+    await controller.getOne(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("getOne - sollte 404 bei nicht existierendem Film zurückgeben", async () => {
+    const ctx = createMockContext({ id: "999" }) as RouterContext<"/movies/:id">;
+    movieRepositoryObj.find = async () => null;
+
+    await controller.getOne(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Movie not found" });
+  });
+
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("create - sollte 400 bei ungültiger Filmdauer zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      title: "Test Movie",
+      duration: -30 // Negative Dauer
+    });
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Duration must be a positive number" });
+  });
+
+  await t.step("update - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext() as RouterContext<"/movies/:id">;
+    await controller.update(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("update - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext({ id: "1" }) as RouterContext<"/movies/:id">;
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.update(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("update - sollte 400 bei fehlenden Pflichtfeldern zurückgeben", async () => {
+    const ctx = createMockContext({ id: "1" }) as RouterContext<"/movies/:id">;
+    ctx.request.body.json = async () => ({
+      duration: 120 // title fehlt
+    });
+
+    await controller.update(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Title and id are required" });
+  });
+
+  await t.step("searchTMDB - sollte 400 bei fehlendem Query-Parameter zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.searchTMDB(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Query parameter is required" });
+  });
+
+  await t.step("searchTMDB - sollte 500 bei API-Fehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'url', {
+      value: new URL("http://localhost/movies/search?query=test")
+    });
+    
+    // Mock für API-Fehler
+    TMDBService.searchMovies = async () => {
+      throw new Error("API connection failed");
+    };
+
+    await controller.searchTMDB(ctx);
+    
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { message: "API connection failed" });
+  });
+
+  await t.step("updateGenres - sollte 400 bei ungültigem Genres-Format zurückgeben", async () => {
+    const ctx = createMockContext({ id: "1" }) as RouterContext<"/movies/:id">;
+    ctx.request.body.json = async () => ({
+      genres: "Action" // Sollte ein Array sein
+    });
+
+    await controller.updateGenres(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Genres must be an array" });
+  });
+
+  await t.step("getShowsByMovieId - sollte 404 bei nicht existierendem Film zurückgeben", async () => {
+    const ctx = createMockContext({ id: "999" }) as RouterContext<"/movies/:id/shows">;
+    movieRepositoryObj.find = async () => null;
+
+    await controller.getShowsByMovieId(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Movie not found" });
+  });
 });

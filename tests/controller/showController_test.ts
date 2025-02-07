@@ -165,4 +165,111 @@ Deno.test("ShowController Tests", async (t) => {
     assertEquals(ctx.response.status, 400);
     assertEquals(ctx.response.body, { message: "Missing required fields" });
   });
+
+  await t.step("getOne - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getOne(ctx as unknown as RouterContext<"/shows/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("create - sollte 400 bei ungültigem Datumsformat zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      movie_id: 1,
+      hall_id: 1,
+      start_time: "ungültiges-datum",
+      base_price: 10
+    });
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Invalid start_time format" });
+  });
+
+  await t.step("create - sollte 500 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      movie_id: 1,
+      hall_id: 1,
+      start_time: new Date().toISOString(),
+      base_price: 10
+    });
+
+    // Mock für Datenbankfehler
+    showRepositoryObj.create = async () => {
+      throw new Error("Database connection failed");
+    };
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { message: "Database connection failed" });
+  });
+
+  await t.step("update - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "1" };
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.update(ctx as unknown as RouterContext<"/shows/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("getSeatsWithStatus - sollte 400 bei fehlender Show-ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getSeatsWithStatus(ctx as unknown as RouterContext<"/shows/:id/seats">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Show ID is required" });
+  });
+
+  await t.step("getSeatsWithStatus - sollte 404 bei nicht existierender Show zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    
+    // Mock für nicht gefundene Show
+    showRepositoryObj.find = async () => null;
+
+    await controller.getSeatsWithStatus(ctx as unknown as RouterContext<"/shows/:id/seats">);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Show not found" });
+  });
+
+  await t.step("getBookingsByShowId - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getBookingsByShowId(ctx as unknown as RouterContext<"/shows/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
+  await t.step("getBookingsByShowId - sollte 404 bei nicht existierender Show zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    
+    // Mock für nicht gefundene Show
+    showRepositoryObj.find = async () => null;
+
+    await controller.getBookingsByShowId(ctx as unknown as RouterContext<"/shows/:id">);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Show not found" });
+  });
+
+  await t.step("delete - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.delete(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
 });

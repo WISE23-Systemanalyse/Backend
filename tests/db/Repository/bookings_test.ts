@@ -9,34 +9,80 @@ const mockBooking = {
   user_id: "user1",
   show_id: 1,
   seat_id: 1,
-  payment_id: "payment1",
+  payment_id: 1,
   created_at: new Date(),
   guest_email: null,
-  guest_name: null
+  guest_name: null,
+  movie_id: 1,
+  hall_id: 1,
+  category_id: 1,
+  payment_method: "PayPal",
+  payment_status: "completed",
+  payment_time: new Date()
 };
 
 // Mock DB Instanz
 const mockDb = {
-  select: () => ({
-    from: function(table: any) {
-      return {
-        where: () => [mockBooking],
-        // Für findAll, wenn where nicht aufgerufen wird
-        ...([mockBooking])
-      };
-    }
-  }),
   insert: () => ({
     values: () => ({
       returning: () => [{ ...mockBooking, id: 2, user_id: "user2" }]
     })
   }),
-  query: {
-    select: () => ({
-      from: () => ({
-        where: () => [mockBooking]
-      })
-    })
+  select: function(...args: any[]) {
+    // Prüfe ob es ein komplexer Query mit Joins ist
+    if (args.length > 0) {
+      return {
+        from: function() {
+          return {
+            where: function() {
+              return this;
+            },
+            leftJoin: function() {
+              return this;
+            },
+            execute: async function() {
+              return [mockDetailedBooking];
+            }
+          };
+        }
+      };
+    }
+    // Einfache Queries ohne Joins
+    return {
+      from: function(table: any) {
+        return {
+          where: () => [mockBooking],
+          ...([mockBooking])
+        };
+      }
+    };
+  }
+};
+
+// Mock für detaillierte Buchungen
+const mockDetailedBooking = {
+  ...mockBooking,
+  show: {
+    id: 1,
+    movie_id: 1,
+    hall_id: 1,
+    start_time: new Date(),
+    base_price: 10
+  },
+  seat: {
+    id: 1,
+    hall_id: 1,
+    row_number: 1,
+    seat_number: 1,
+    category_id: 1
+  },
+  payment: {
+    id: 1,
+    amount: 10,
+    tax: 1.9,
+    payment_method: "PayPal",
+    payment_status: "completed",
+    payment_time: new Date()
   }
 };
 
@@ -64,10 +110,6 @@ Deno.test("Bookings Repository Tests", async (t) => {
   await t.step("sollte Buchungen nach ShowId finden", async () => {
     const bookings = await bookingRepositoryObj.getBookingsByShowId(1);
 
-    console.log("bookings", bookings);
-    console.log("bookings.length", bookings.length);
-    console.log("bookings[0]", bookings[0]);
-    console.log("bookings[0].show_id", bookings[0].show_id);
     assertEquals(bookings.length, 1);
     assertEquals(bookings[0].show_id, 1);
   });
@@ -104,5 +146,56 @@ Deno.test("Bookings Repository Tests", async (t) => {
     });
     assertEquals(result.id, 2);
     assertEquals(result.user_id, "user2");
+  });
+
+  await t.step("sollte Buchungen nach PaymentId finden", async () => {
+    // @ts-ignore - Mock query
+    db.query = async () => [mockDetailedBooking];
+
+    const bookings = await bookingRepositoryObj.getBookingsByPaymentId(1);
+    
+    assertEquals(bookings.length, 1);
+    assertEquals(bookings[0].payment_id, 1);
+    assertEquals(bookings[0].show_id, 1);
+    assertEquals(bookings[0].seat_id, 1);
+  });
+
+  await t.step("sollte alle Buchungsdetails finden", async () => {
+    const bookings = await bookingRepositoryObj.getAllBookingDetails();
+    
+    assertEquals(bookings.length, 1);
+    assertEquals(bookings[0].movie_id, 1);
+    assertEquals(bookings[0].hall_id, 1);
+    assertEquals(bookings[0].category_id, 1);
+    assertEquals(bookings[0].payment_method, "PayPal");
+  });
+
+  await t.step("sollte ein Array mit einer Buchungen zurückgeben", async () => {
+    // @ts-ignore - Mock query
+    db.query = async () => [];
+
+    const bookings = await bookingRepositoryObj.getAllBookingDetails();
+
+    assertEquals(bookings.length, 1);
+  });
+
+  await t.step("sollte mit fehlenden Beziehungen umgehen können", async () => {
+    const mockIncompleteBooking = {
+      ...mockBooking,
+      show: null,
+      seat: null,
+      payment: null
+    };
+
+    // @ts-ignore - Mock query
+    db.query = async () => [mockIncompleteBooking];
+
+    const bookings = await bookingRepositoryObj.getAllBookingDetails();
+    
+    assertEquals(bookings.length, 1);
+    assertEquals(bookings[0].start_time, undefined);
+    assertEquals(bookings[0].row_number, undefined);
+    assertEquals(bookings[0].seat_number, undefined);
+    assertEquals(bookings[0].time_of_payment, undefined);
   });
 });
