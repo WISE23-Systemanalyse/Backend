@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { bookingRepositoryObj } from "../../db/repositories/bookings.ts";
-import { db } from "../../db/db.ts";
+import { bookingRepositoryObj } from "../../../db/repositories/bookings.ts";
+import { db } from "../../../db/db.ts";
 import { eq } from "drizzle-orm";
 
 // Mock für die Datenbank-Queries
