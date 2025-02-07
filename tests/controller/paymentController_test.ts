@@ -151,6 +151,14 @@ Deno.test("PaymentController Tests", async (t) => {
     assertEquals(ctx.response.body, { message: "Payment not found" });
   });
 
+  await t.step("getOne - sollte 400 bei fehlender ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.getOne(ctx as unknown as RouterContext<"/payments/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Id parameter is required" });
+  });
+
   await t.step("create - should create payment successfully", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ({
@@ -164,6 +172,19 @@ Deno.test("PaymentController Tests", async (t) => {
     assertEquals(ctx.response.body, mockPayment);
   });
 
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+    
+    await controller.create(ctx as RouterContext<"/payments">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
   await t.step("createPayPalOrder - should create order successfully", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ({
@@ -175,6 +196,133 @@ Deno.test("PaymentController Tests", async (t) => {
     
     assertEquals(ctx.response.status, 200);
     assertEquals(ctx.response.body, mockPayPalOrder);
+  });
+
+  await t.step("createPayPalOrder - sollte 400 bei PayPal-Fehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      seats: [1],
+      showId: 1
+    });
+    
+    // Mock für PayPal-Fehler
+    payPalServiceObj.createOrder = async () => {
+      throw new Error("PayPal order creation failed");
+    };
+    
+    await controller.createPayPalOrder(ctx as RouterContext<"/payments/create-order">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "PayPal order creation failed" });
+  });
+
+  await t.step("capturePayPalOrder - sollte 400 bei fehlender Order ID zurückgeben", async () => {
+    const ctx = createMockContext();
+    await controller.capturePayPalOrder(ctx as unknown as RouterContext<"/payments/capture/:orderId">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Order ID is required" });
+  });
+
+  await t.step("capturePayPalOrder - sollte 400 bei PayPal-Fehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { orderId: "123" };
+    
+    // Mock für PayPal-Fehler
+    payPalServiceObj.captureOrder = async () => {
+      throw new Error("PayPal capture failed");
+    };
+    
+    await controller.capturePayPalOrder(ctx as unknown as RouterContext<"/payments/capture/:orderId">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "PayPal capture failed" });
+  });
+
+  await t.step("finalizeBooking - sollte PayPal-Zahlung erfolgreich abschließen", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      orderId: "123",
+      seats: [1],
+      showId: 1,
+      userId: "user1"
+    });
+
+    // Mock für erfolgreiche PayPal-Erfassung
+    payPalServiceObj.captureOrder = async () => ({
+      purchase_units: [{
+        payments: {
+          captures: [{
+            amount: { value: "10.00" }
+          }]
+        }
+      }]
+    });
+
+    await controller.finalizeBooking(ctx as unknown as RouterContext<"/payments/finalize">);
+    assertEquals(ctx.response.status, 201);
+    assertEquals((ctx.response.body as {payment_id: number}).payment_id, 1);
+    assertEquals((ctx.response.body as {bookings: any[]}).bookings.length, 1);
+  });
+
+  await t.step("finalizeBooking - sollte Zahlungsdatensatz erstellen", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      orderId: "123",
+      seats: [1],
+      showId: 1,
+      userId: "user1"
+    });
+
+    // Mock für Zahlungserstellung
+    paymentRepositoryObj.create = async (data) => ({
+      id: 1,
+      ...data,
+      payment_time: new Date(),
+      time_of_payment: new Date()
+    });
+
+    await controller.finalizeBooking(ctx as unknown as RouterContext<"/payments/finalize">);
+    assertEquals(ctx.response.status, 201);
+    assertEquals((ctx.response.body as {payment_id: number}).payment_id, 1);
+  });
+
+  await t.step("finalizeBooking - sollte Buchungsdatensätze erstellen", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      orderId: "123",
+      seats: [1, 2],
+      showId: 1,
+      userId: "user1"
+    });
+
+    // Mock für Buchungserstellung
+    bookingRepositoryObj.create = async (data) => ({
+      id: Math.random(),
+      ...data,
+      booking_time: new Date()
+    });
+
+    await controller.finalizeBooking(ctx as unknown as RouterContext<"/payments/finalize">);
+    assertEquals(ctx.response.status, 201);
+    assertEquals((ctx.response.body as {bookings: any[]}).bookings.length, 2);
+    assertEquals(typeof (ctx.response.body as {bookings: any[]}).bookings[0].token, "string");
+  });
+
+  await t.step("update - sollte 400 bei nicht existierender Zahlung zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    ctx.request.body.json = async () => ({
+      payment_status: "refunded"
+    });
+
+    // Mock für nicht gefundene Zahlung
+    paymentRepositoryObj.find = async () => null;
+
+    await controller.update(ctx as unknown as RouterContext<"/payments/:id">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Invalid JSON" });
   });
 
 });

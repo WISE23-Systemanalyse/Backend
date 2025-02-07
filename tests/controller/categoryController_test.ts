@@ -65,6 +65,19 @@ Deno.test("CategoryController Tests", async (t) => {
     assertEquals(ctx.response.body, { message: "Id parameter is required" });
   });
 
+  await t.step("getOne - sollte 404 bei nicht gefundener Kategorie zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    
+    // Mock für nicht gefundene Kategorie
+    categoryRepositoryObj.find = async () => null;
+
+    await controller.getOne(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Category not found" });
+  });
+
   await t.step("create - should create category successfully", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ({
@@ -87,18 +100,48 @@ Deno.test("CategoryController Tests", async (t) => {
     assertEquals(ctx.response.body, { message: "Name is required" });
   });
 
-  await t.step("update - should update category successfully", async () => {
+  await t.step("create - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
+    const ctx = createMockContext();
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
+    });
+
+    await controller.create(ctx);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
+  });
+
+  await t.step("update - sollte 404 bei nicht gefundener Kategorie zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.params = { id: "999" };
+    ctx.request.body.json = async () => ({
+      id: 999,
+      category_name: "Updated Category"
+    });
+
+    // Mock für nicht gefundene Kategorie
+    categoryRepositoryObj.find = async () => null;
+
+    await controller.update(ctx);
+    
+    assertEquals(ctx.response.status, 404);
+    assertEquals(ctx.response.body, { message: "Category not found" });
+  });
+
+  await t.step("update - sollte 400 bei fehlendem Request Body zurückgeben", async () => {
     const ctx = createMockContext();
     ctx.params = { id: "1" };
-    ctx.request.body.json = async () => ({
-      id: 1,
-      category_name: "Updated Category"
+    Object.defineProperty(ctx.request, 'body', {
+      value: undefined,
+      writable: true
     });
 
     await controller.update(ctx);
     
-    assertEquals(ctx.response.status, 200);
-    assertEquals((ctx.response.body as { category_name: string }).category_name, "Updated Category");
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body is required" });
   });
 
   await t.step("delete - should delete category successfully", async () => {
@@ -122,6 +165,35 @@ Deno.test("CategoryController Tests", async (t) => {
     assertEquals(Array.isArray(ctx.response.body), true);
   });
 
+  await t.step("bulkCreate - sollte 400 bei ungültigem Array zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({ 
+      notAnArray: true 
+    });
+
+    await controller.bulkCreate(ctx as RouterContext<"/categories/bulk">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body must be an array of categories" });
+  });
+
+  await t.step("bulkCreate - sollte 400 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ([
+      { category_name: "Category 1" }
+    ]);
+
+    // Mock für Datenbankfehler
+    categoryRepositoryObj.create = async () => {
+      throw new Error("Database error");
+    };
+
+    await controller.bulkCreate(ctx as RouterContext<"/categories/bulk">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Database error" });
+  });
+
   await t.step("bulkUpdate - should update multiple categories", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ([
@@ -134,6 +206,18 @@ Deno.test("CategoryController Tests", async (t) => {
     assertEquals(Array.isArray(ctx.response.body), true);
   });
 
+  await t.step("bulkUpdate - sollte 400 bei ungültigem Array zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({ 
+      notAnArray: true 
+    });
+
+    await controller.bulkUpdate(ctx as RouterContext<"/categories/bulk">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body must be an array of categories" });
+  });
+
   await t.step("bulkDelete - should delete multiple categories", async () => {
     const ctx = createMockContext();
     ctx.request.body.json = async () => ([1, 2, 3]);
@@ -141,5 +225,32 @@ Deno.test("CategoryController Tests", async (t) => {
     await controller.bulkDelete(ctx as RouterContext<"/categories/bulk">);
     
     assertEquals(ctx.response.status, 204);
+  });
+
+  await t.step("bulkDelete - sollte 400 bei ungültigem Array zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({ 
+      notAnArray: true 
+    });
+
+    await controller.bulkDelete(ctx as RouterContext<"/categories/bulk">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Request body must be an array of category IDs" });
+  });
+
+  await t.step("bulkDelete - sollte 400 bei Datenbankfehler zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ([1, 2, 3]);
+
+    // Mock für Datenbankfehler
+    categoryRepositoryObj.delete = async () => {
+      throw new Error("Database error during deletion");
+    };
+
+    await controller.bulkDelete(ctx as RouterContext<"/categories/bulk">);
+    
+    assertEquals(ctx.response.status, 400);
+    assertEquals(ctx.response.body, { message: "Database error during deletion" });
   });
 });
