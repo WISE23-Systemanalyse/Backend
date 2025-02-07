@@ -67,7 +67,7 @@ export class UserAuthService {
         },
         Deno.env.get("JWT_SECRET_KEY")!,
       );
-      const { password: _password, isAdmin: _isAdmin, ...custonUser } = user;
+      const { password: _password, ...custonUser } = user;
       return {
         user: custonUser,
         token
