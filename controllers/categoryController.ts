@@ -1,11 +1,11 @@
-import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
+import { RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { categoryRepositoryObj } from "../db/repositories/categories.ts";
 import { Category } from "../db/models/categories.ts";
 
-export class CategoryController implements Controller<Category> {
+export class CategoryController {
   async getAll(ctx: RouterContext<string>): Promise<void> {
     const categories = await categoryRepositoryObj.findAll();
+    ctx.response.status = 200;
     ctx.response.body = categories;
   }
 
@@ -16,8 +16,9 @@ export class CategoryController implements Controller<Category> {
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    const category = await categoryRepositoryObj.find(id);
+    const category = await categoryRepositoryObj.find(Number(id));
     if (category) {
+      ctx.response.status = 200;
       ctx.response.body = category;
     } else {
       ctx.response.status = 404;
@@ -79,14 +80,14 @@ export class CategoryController implements Controller<Category> {
     }
   }
 
-  async delete(ctx: Context): Promise<void> {
+  async delete(ctx: RouterContext<"/categories/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
       ctx.response.body = { message: "Id parameter is required" };
       return;
     }
-    await categoryRepositoryObj.delete(id);
+    await categoryRepositoryObj.delete(Number(id));
     ctx.response.status = 204;
   }
 
@@ -113,7 +114,7 @@ export class CategoryController implements Controller<Category> {
       ctx.response.body = createdCategories;
     } catch (error) {
       ctx.response.status = 400;
-      ctx.response.body = { message: error.message };
+      ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -139,7 +140,7 @@ export class CategoryController implements Controller<Category> {
       ctx.response.body = updatedCategories;
     } catch (error) {
       ctx.response.status = 400;
-      ctx.response.body = { message: error.message };
+      ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -165,7 +166,7 @@ export class CategoryController implements Controller<Category> {
       ctx.response.status = 204;
     } catch (error) {
       ctx.response.status = 400;
-      ctx.response.body = { message: error.message };
+      ctx.response.body = { message: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 }

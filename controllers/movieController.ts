@@ -1,10 +1,9 @@
 import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
 import { movieRepositoryObj, showRepositoryObj } from "../db/repositories/index.ts";
 import { Movie } from "../db/models/movies.ts";
 import { TMDBService } from "../services/tmdbService.ts";
 
-export class MovieController implements Controller<Movie> {
+export class MovieController {
   async getAll(ctx: Context): Promise<void> {
     const movies = await movieRepositoryObj.findAll();
     ctx.response.body = movies;
@@ -176,7 +175,7 @@ export class MovieController implements Controller<Movie> {
     const updatedMovie = await movieRepositoryObj.update(Number(id), { ...movie, genres });
     ctx.response.body = updatedMovie;
   }
-  async getShowsByMovieId(ctx: Context): Promise<void> {
+  async getShowsByMovieId(ctx: RouterContext<"/movies/:id/shows">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;

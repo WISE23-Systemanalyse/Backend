@@ -1,12 +1,11 @@
-import { Context } from "https://deno.land/x/oak@v17.1.3/mod.ts";
-import { Controller } from "../interfaces/controller.ts";
+import { Context, RouterContext } from "https://deno.land/x/oak@v17.1.3/mod.ts";
 import { showRepositoryObj } from "../db/repositories/shows.ts";
 import { Show } from "../db/models/shows.ts";
 import { bookingRepositoryObj } from "../db/repositories/bookings.ts";
 import { seatRepositoryObj } from "../db/repositories/seats.ts";
 import { reservationServiceObj } from "../services/reservationService.ts";
 
-export class ShowController implements Controller<Show> {
+export class ShowController {
   async getAll(ctx: Context): Promise<void> {
     const shows = await showRepositoryObj.findAll();
     ctx.response.body = shows;
@@ -17,7 +16,7 @@ export class ShowController implements Controller<Show> {
     ctx.response.body = shows;
   }
 
-  async getOne(ctx: Context): Promise<void> {
+  async getOne(ctx: RouterContext<"/shows/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -33,7 +32,7 @@ export class ShowController implements Controller<Show> {
     }
   }
 
-  async getOneWithDetails(ctx: Context): Promise<void> {
+  async getOneWithDetails(ctx: RouterContext<"/shows/:id">): Promise<void> {
     const { id } = ctx.params;
     if (!id) {
       ctx.response.status = 400;
@@ -49,9 +48,9 @@ export class ShowController implements Controller<Show> {
     }
   }
 
-  async getShowsByHallId(ctx: Context): Promise<void> {
+  async getShowsByHallId(ctx: RouterContext<"/shows/hall/:id">): Promise<void> {
     const { id } = ctx.params;
-    const shows = await showRepositoryObj.findByHallId(id);
+    const shows = await showRepositoryObj.findByHallId(Number(id));
     ctx.response.body = shows;
   }
 
@@ -72,12 +71,12 @@ export class ShowController implements Controller<Show> {
       return;
     }
 
-    const newShow: Partial<Show> = {
+    const newShow = {
       movie_id,
       hall_id,
       start_time: startTime,
       base_price,
-    };
+    } as Show;
 
     try {
       const show = await showRepositoryObj.create(newShow);
