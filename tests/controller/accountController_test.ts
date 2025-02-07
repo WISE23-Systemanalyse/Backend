@@ -28,8 +28,7 @@ const mockUserAuthService = {
 Deno.test("AccountController Tests", async (t) => {
   const controller = new AccountController();
 
-
-
+  // Setup der Mocks vor jedem Test
   userAuthServiceObj.register = mockUserAuthService.register;
   userAuthServiceObj.verifyUser = mockUserAuthService.verifyUser;
   userAuthServiceObj.login = mockUserAuthService.login;
@@ -116,4 +115,72 @@ Deno.test("AccountController Tests", async (t) => {
     assertEquals(ctx.response.body, { error: "Email and code are required." });
   });
 
+  await t.step("signin - sollte Fehler bei falschen Anmeldedaten zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      email: "wrong@test.com",
+      password: "wrongpassword"
+    });
+
+    // Mock für fehlgeschlagenen Login
+    userAuthServiceObj.login = async () => {
+      throw new Error("Invalid credentials");
+    };
+
+    await controller.signin(ctx as RouterContext<"/signin">);
+    assertEquals(ctx.response.status, 401);
+    assertEquals(ctx.response.body, { error: "Invalid credentials" });
+  });
+
+  await t.step("verifyEmail - sollte Fehler bei abgelaufenem Code zurückgeben", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      email: "test@test.com",
+      code: "123456"
+    });
+
+    // Mock für abgelaufenen Code
+    userAuthServiceObj.verifyUser = async () => {
+      throw new Error("Verification code has expired");
+    };
+
+    await controller.verifyEmail(ctx as RouterContext<"/verifyemail">);
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { error: "Verification code has expired" });
+  });
+
+  await t.step("signup - sollte Serverfehler korrekt behandeln", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      email: "test@test.com",
+      password: "password123",
+      userName: "testuser"
+    });
+
+    // Mock für Serverfehler
+    userAuthServiceObj.register = async () => {
+      throw new Error("Database connection failed");
+    };
+
+    await controller.signup(ctx as RouterContext<"/signup">);
+    assertEquals(ctx.response.status, 500);
+    assertEquals(ctx.response.body, { error: "Database connection failed" });
+  });
+
+  await t.step("signin - sollte Serverfehler korrekt behandeln", async () => {
+    const ctx = createMockContext();
+    ctx.request.body.json = async () => ({
+      email: "test@test.com",
+      password: "password123"
+    });
+
+    // Mock für Serverfehler
+    userAuthServiceObj.login = async () => {
+      throw new Error("Internal server error");
+    };
+
+    await controller.signin(ctx as RouterContext<"/signin">);
+    assertEquals(ctx.response.status, 401);
+    assertEquals(ctx.response.body, { error: "Internal server error" });
+  });
 });

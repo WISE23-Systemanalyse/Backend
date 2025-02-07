@@ -64,10 +64,6 @@ Deno.test("Bookings Repository Tests", async (t) => {
   await t.step("sollte Buchungen nach ShowId finden", async () => {
     const bookings = await bookingRepositoryObj.getBookingsByShowId(1);
 
-    console.log("bookings", bookings);
-    console.log("bookings.length", bookings.length);
-    console.log("bookings[0]", bookings[0]);
-    console.log("bookings[0].show_id", bookings[0].show_id);
     assertEquals(bookings.length, 1);
     assertEquals(bookings[0].show_id, 1);
   });
