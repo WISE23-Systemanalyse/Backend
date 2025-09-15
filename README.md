@@ -21,8 +21,8 @@ Bevor Sie beginnen, stellen Sie sicher, dass folgende Software installiert ist:
 
    - Erstellen Sie eine `.env` Datei und passen Sie die Werte an:
 
-    DATABASE_URL=postgres://root:password123@localhost:5432/cinema
-    TMDB_API_KEY=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2M2NlYzU4ZGQ4ODI3ODA3NzViMGNhZjRhZGVlMTY2YyIsIm5iZiI6MTczMzIyMjU3MS40NjcsInN1YiI6IjY3NGVlMGFiOTAyOWExZmNjMzZhYTVjNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.nSa8QmTJD6aFuCFSGLRFBLe4kin-zR-nudk_qK0643w
+    DATABASE_URL=
+    TMDB_API_KEY=
 
 3. **Datenbank starten**
 
